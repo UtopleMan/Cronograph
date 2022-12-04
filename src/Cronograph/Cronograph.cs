@@ -12,9 +12,9 @@ namespace Cronograph;
 
 public interface ICronograph
 {
-    void AddJob(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo timeZone = default);
-    void AddOneShot(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo timeZone = default);
-    void AddScheduledService<T>(string name, string cron, TimeZoneInfo timeZone = null) where T : IScheduledService;
+    void AddJob(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default);
+    void AddOneShot(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default);
+    void AddScheduledService<T>(string name, string cron, TimeZoneInfo? timeZone = default) where T : IScheduledService;
 }
 public class Cronograph : BackgroundService, ICronograph
 {
@@ -30,25 +30,25 @@ public class Cronograph : BackgroundService, ICronograph
         this.logger = logger;
         this.provider = services.BuildServiceProvider();
     }
-    public void AddJob(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo timeZone = default)
+    public void AddJob(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default)
     {
         var job = CreateJob(name, call, cron, timeZone);
         store.Add(name, job);
     }
 
-    public void AddOneShot(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo timeZone = null)
+    public void AddOneShot(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default)
     {
         var job = CreateJob(name, call, cron, timeZone);
         store.Add(name, job with { OneShot = true });
     }
-    public void AddScheduledService<T>(string name, string cron, TimeZoneInfo timeZone = null) where T : IScheduledService
+    public void AddScheduledService<T>(string name, string cron, TimeZoneInfo? timeZone = default) where T : IScheduledService
     {
         var service = provider.GetRequiredService<T>();
 
         var job = CreateJob(name, service.ExecuteAsync, cron, timeZone);
         store.Add(name, job);
     }
-    private Job CreateJob(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo timeZone)
+    private Job CreateJob(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone)
     {
         var usedTimeZone = timeZone;
         if (usedTimeZone == default)

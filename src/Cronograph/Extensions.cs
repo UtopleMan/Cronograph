@@ -16,8 +16,4 @@ public static class Extensions
         services.AddSingleton<IDateTime, DateTimeService>();
         return services;
     }
-    public static IServiceCollection AddScheduledService<T>(this IServiceCollection services, string name, string cron, TimeZoneInfo timeZone = default) where T : IScheduledService
-    {
-        return services;
-    }
 }

@@ -1,5 +1,4 @@
-﻿using Cronos;
-using Microsoft.AspNetCore.Http.Extensions;
+﻿using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.FileProviders;
 using MimeTypes;
 using System.Reflection;
@@ -7,7 +6,6 @@ using System.Reflection;
 namespace Cronograph.UI;
 public static class Extensions
 {
-
     public static IApplicationBuilder UseCronographUI(this IApplicationBuilder applicationBuilder, string subPath = "cronograph")
     {
         var endpointBuilder = (IEndpointRouteBuilder) applicationBuilder;
@@ -38,11 +36,8 @@ public static class Extensions
         var ext = file.Substring(position + 1).ToLowerInvariant();
         return MimeTypeMap.GetMimeType(ext);
     }
-    static IEnumerable<JobViewModel> ToViewModel(this IEnumerable<Job> items) =>
-        items.Select(x => new JobViewModel(x.Name, x.CronString, x.TimeZone.StandardName, x.OneShot, x.State.ToString(), x.LastJobRunState.ToString(), x.LastJobRunMessage,
-            x.Runs.Select(y => new JobRunViewModel(y.State.ToString(), y.Message, y.Start, y.End))));
 
-    private static void MapFiles(string dirName, IFileProvider provider, IApplicationBuilder appBuilder)
+    static void MapFiles(string dirName, IFileProvider provider, IApplicationBuilder appBuilder)
     {
         var folder = provider.GetDirectoryContents(dirName);
         foreach (var item in folder)
@@ -56,26 +51,25 @@ public static class Extensions
             map = ("/" + map).Replace("www/", "");
             appBuilder.Map(map, app =>
             {
-                var f = item;
+                var file = item;
 
                 app.Run(async cnt =>
                 {
                     cnt.Response.ContentType = GetContentType(map);
-                    if (f.Length < 1)
-                        throw new ArgumentException($"file {f.Name} does not exists");
+                    if (file.Length < 1)
+                        throw new ArgumentException($"file {file.Name} does not exists");
 
-                    var chunks = Math.Max(2048, f.Length / 3);
-                    byte[] buffer = new byte[chunks];
+                    var chunks = Math.Max(2048, file.Length / 3);
+                    var buffer = new byte[chunks];
                     using var stream = new MemoryStream();
-                    using var cs = f.CreateReadStream();
+                    using var cs = file.CreateReadStream();
                     int bytesRead;
                     while ((bytesRead = cs.Read(buffer, 0, buffer.Length)) > 0)
                     {
                         stream.Write(buffer, 0, bytesRead);
                     }
-                    byte[] result = stream.ToArray();
-                    var m = new Memory<byte>(result);
-                    await cnt.Response.BodyWriter.WriteAsync(m);
+                    var result = stream.ToArray();
+                    await cnt.Response.BodyWriter.WriteAsync(new Memory<byte>(result));
                 });
             });
         }
