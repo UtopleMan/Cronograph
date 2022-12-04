@@ -10,7 +10,10 @@ public static class Extensions
     {
         services.AddSingleton<IDateTime, DateTimeService>();
         services.AddSingleton<ICronograph, Cronograph>();
+        services.AddSingleton(services);
         services.AddHostedService<Cronograph>();
+        services.AddSingleton<ICronographStore, InMemCronographStore>();
+        services.AddSingleton<IDateTime, DateTimeService>();
         return services;
     }
     public static IServiceCollection AddScheduledService<T>(this IServiceCollection services, string name, string cron, TimeZoneInfo timeZone = default) where T : IScheduledService

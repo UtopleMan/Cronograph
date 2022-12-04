@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Cronograph;
 
@@ -12,18 +14,21 @@ public interface ICronograph
 {
     void AddJob(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo timeZone = default);
     void AddOneShot(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo timeZone = default);
-    void AddService(string name, IScheduledService scheduledService, string cron, TimeZoneInfo timeZone = default);
-
+    void AddScheduledService<T>(string name, string cron, TimeZoneInfo timeZone = null) where T : IScheduledService;
 }
 public class Cronograph : BackgroundService, ICronograph
 {
     private readonly IDateTime dateTime;
     private readonly ICronographStore store;
+    private readonly ILogger<Cronograph> logger;
+    private readonly ServiceProvider provider;
 
-    public Cronograph(IDateTime dateTime, ICronographStore store)
+    public Cronograph(IDateTime dateTime, ICronographStore store, IServiceCollection services, ILogger<Cronograph> logger)
     {
         this.dateTime = dateTime;
         this.store = store;
+        this.logger = logger;
+        this.provider = services.BuildServiceProvider();
     }
     public void AddJob(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo timeZone = default)
     {
@@ -36,9 +41,11 @@ public class Cronograph : BackgroundService, ICronograph
         var job = CreateJob(name, call, cron, timeZone);
         store.Add(name, job with { OneShot = true });
     }
-    public void AddService(string name, IScheduledService scheduledService, string cron, TimeZoneInfo timeZone = null)
+    public void AddScheduledService<T>(string name, string cron, TimeZoneInfo timeZone = null) where T : IScheduledService
     {
-        var job = CreateJob(name, scheduledService.ExecuteAsync, cron, timeZone);
+        var service = provider.GetRequiredService<T>();
+
+        var job = CreateJob(name, service.ExecuteAsync, cron, timeZone);
         store.Add(name, job);
     }
     private Job CreateJob(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo timeZone)
@@ -52,7 +59,7 @@ public class Cronograph : BackgroundService, ICronograph
             expression = CronExpression.Parse(cron, CronFormat.IncludeSeconds);
         else
             expression = CronExpression.Parse(cron);
-        return new Job(name, call, expression, usedTimeZone);
+        return new Job(name, call, cron, expression, usedTimeZone, new());
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -64,21 +71,45 @@ public class Cronograph : BackgroundService, ICronograph
             await Task.Delay(msToJob, stoppingToken);
             if (stoppingToken.IsCancellationRequested)
                 return;
-            foreach (var job in jobs.Where(x => !x.Running))
+            foreach (var job in jobs.Where(x => x.State != JobStates.Running))
             {
-                job.Running = true;
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                job.State = JobStates.Running;
+                if (job.OneShot == true)
+                    store.Remove(job.Name);
+                                                        #pragma warning disable CS4014
                 Task.Run(
                     async () =>
                     {
-                        await job.Action(stoppingToken);
-                        if (job.OneShot == true)
-                            store.Remove(job.Name);
-                        job.Running = false;
+                        await RunAction(job, stoppingToken);
                     },
                     stoppingToken);
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                                                        #pragma warning restore CS4014
             }
+        }
+    }
+
+    private async Task RunAction(Job job, CancellationToken stoppingToken)
+    {
+        var start = dateTime.UtcNow;
+        try
+        {
+            job.State = JobStates.Running;
+            await job.Action(stoppingToken);
+            job.State = JobStates.Finished;
+            job.Runs.Add(new JobRun(JobRunStates.Success, "", start, dateTime.UtcNow));
+            job.LastJobRunState = JobRunStates.Success;
+            job.LastJobRunMessage = "";
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Error caught in job [{jobName}] - {exceptionMessage}", job.Name, exception.Message);
+            job.Runs.Add(new JobRun(JobRunStates.Failed, exception.Message, start, dateTime.UtcNow));
+            job.LastJobRunState = JobRunStates.Failed;
+            job.LastJobRunMessage = exception.Message;
+        }
+        finally
+        {
+            job.State = JobStates.Finished;
         }
     }
 

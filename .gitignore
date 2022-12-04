@@ -350,5 +350,4 @@ MigrationBackup/
 .ionide/
 
 # nupkg files
-*.nupkg
-/src/Cronograph/source/workspace/packages/Cronograph.1.0.9999.nupkg
+**/*.nupkg

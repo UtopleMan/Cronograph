@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Cronograph.UI": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:50519;http://localhost:50520"
+    }
+  }
+}
