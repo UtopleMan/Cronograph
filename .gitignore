@@ -348,3 +348,7 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+
+# nupkg files
+*.nupkg
+/src/Cronograph/source/workspace/packages/Cronograph.1.0.9999.nupkg
