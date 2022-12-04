@@ -21,6 +21,7 @@
     <PackageOutputPath>./source/workspace/packages</PackageOutputPath>
     <PackageTags>Batch, HangFire, Job, CronTab, Cron</PackageTags>
     <RepositoryUrl>https://github.com/UtopleMan/Cronograph</RepositoryUrl>
+    <IsPackable>true</IsPackable>
     <RepositoryType>GIT</RepositoryType>
     <NeutralLanguage>en-US</NeutralLanguage>
     <Description>Cronograph is a simple Cronjob runner created as a HangFire replacement. Cronograph is easily testable and integrates well into Microsoft.Extensions.DependencyInjection</Description>
@@ -32,6 +33,10 @@
     <EmbeddedResource Include="www\**\*">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>
