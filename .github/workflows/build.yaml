@@ -19,7 +19,7 @@ jobs:
       run: |
         sed 's/9999/'${{ github.run_number }}-alpha'/g' src/Cronograph/Cronograph.csproj > src/Cronograph/Cronograph.final.csproj
         cp src/Cronograph/Cronograph.final.csproj src/Cronograph/Cronograph.csproj
-        sed 's/9999/'${{ github.run_number }}-alpha'/g' src/Cronograph.UI/Cronograph.UI.csproj > src/Cronograph/Cronograph.UI.final.csproj
+        sed 's/9999/'${{ github.run_number }}-alpha'/g' src/Cronograph.UI/Cronograph.UI.csproj > src/Cronograph.UI/Cronograph.UI.final.csproj
         cp src/Cronograph.UI/Cronograph.UI.final.csproj src/Cronograph.UI/Cronograph.UI.csproj
     - name: Build
       run: dotnet build src --configuration Release
