@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+
+    <Title>Cronograph</Title>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <VersionSuffix>$(VersionSuffix)</VersionSuffix>
+    <PackageId>Cronograph</PackageId>
+    <PackageVersion>1.0.9999</PackageVersion>
+    <Version>1.0.9999</Version>
+    <FileVersion>1.0.9999</FileVersion>
+    <Authors>Peter Andersen</Authors>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageProjectUrl>https://github.com/UtopleMan/Cronograph</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageOutputPath>./source/workspace/packages</PackageOutputPath>
+    <PackageTags>Batch, HangFire, Job, CronTab, Cron</PackageTags>
+    <RepositoryUrl>https://github.com/UtopleMan/Cronograph</RepositoryUrl>
+    <RepositoryType>GIT</RepositoryType>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <Description>Cronograph is a simple Cronjob runner created as a HangFire replacement. Cronograph is easily testable and integrates well into Microsoft.Extensions.DependencyInjection</Description>
+    <Copyright>Copyright 2022</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Cronos" Version="0.7.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="\"/>
+  </ItemGroup>
+</Project>
