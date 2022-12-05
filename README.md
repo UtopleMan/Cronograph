@@ -4,7 +4,7 @@
 - [Overview](#overview)
 - [Features](#features)
 - [Usage](#usage)
-- [User interface](#User interface)
+- [UserInterface](#UserInterface)
 <!-- /MarkdownTOC -->
 
 ## Overview
@@ -75,7 +75,7 @@ public class MyService : IScheduledService
 }
 ```
 
-##User interface
+##UserInterface
 
 Crongraph has a simple user interface to visualize the jobs currently registred on the system. Add the following NuGET package:
 
