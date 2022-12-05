@@ -97,5 +97,5 @@ app.Run();
 
 And you should be able to see the user interface on https://YourFantasticMachineAnd:port/Cronograph
 
-![Cronograph UI](https://github.com/[username]/[reponame]/blob/[branch]/image.jpg?raw=true)
+![Cronograph UI](https://github.com/UtopleMan/Cronograph/images/main/ui.png?raw=true)
 
