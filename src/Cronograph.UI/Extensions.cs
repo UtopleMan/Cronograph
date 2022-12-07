@@ -5,7 +5,7 @@ using System.Reflection;
 namespace Cronograph.UI;
 public static class Extensions
 {
-    private const string physicalDir = "www";
+    private const string physicalDir = "wwwroot";
     public static IApplicationBuilder UseCronographUI(this IApplicationBuilder applicationBuilder, string subPath = "cronograph")
     {
         var endpointBuilder = (IEndpointRouteBuilder)applicationBuilder;
