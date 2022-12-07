@@ -45,6 +45,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Cronograph.Client\Cronograph.Client.csproj" />
     <ProjectReference Include="..\Cronograph\Cronograph.csproj" />
   </ItemGroup>
 </Project>
