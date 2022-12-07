@@ -3,7 +3,7 @@
     "TestApp": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "cronograph",
+      "launchUrl": "cronograph/",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

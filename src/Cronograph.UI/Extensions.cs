@@ -13,7 +13,11 @@ public static class Extensions
         MapFiles(physicalDir, subPath, manifestEmbeddedProvider, applicationBuilder);
 
         endpointBuilder.MapGet(subPath + "/jobs", (ICronographStore store) => store.Get().ToViewModel());
-        endpointBuilder.Map(subPath + "/{**:nonfile}", async ctx => ctx.Response.Redirect($"{subPath}/index.html"));
+        endpointBuilder.Map(subPath + "/{**:nonfile}", async cnt =>
+        {
+            var index = manifestEmbeddedProvider.GetDirectoryContents(physicalDir).Single(x => x.Name.Contains("index.html"));
+            await ReadFile(cnt.Response, index, $"{subPath}/index.html");
+        });
         return applicationBuilder;
     }
     static string GetContentType(string file)
@@ -39,30 +43,32 @@ public static class Extensions
             string map = (dirName + "/" + item.Name);
             map = ("/" + map).Replace($"{physicalDir}/", "");
 
-            Console.WriteLine("/" + subPath + map);
             appBuilder.Map("/" + subPath + map, app =>
             {
                 var file = item;
                 app.Run(async cnt =>
                 {
-                    Console.WriteLine("Trying: /" + file.Name + " to physical path " + file.PhysicalPath);
-                    cnt.Response.ContentType = GetContentType(map);
-                    if (file.Length < 1)
-                        throw new ArgumentException($"file {file.Name} does not exists");
-
-                    var chunks = Math.Max(2048, file.Length / 3);
-                    var buffer = new byte[chunks];
-                    using var stream = new MemoryStream();
-                    using var cs = file.CreateReadStream();
-                    int bytesRead;
-                    while ((bytesRead = cs.Read(buffer, 0, buffer.Length)) > 0)
-                    {
-                        stream.Write(buffer, 0, bytesRead);
-                    }
-                    var result = stream.ToArray();
-                    await cnt.Response.BodyWriter.WriteAsync(new Memory<byte>(result));
+                    await ReadFile(cnt.Response, file, map);
                 });
             });
         }
+    }
+    static async Task ReadFile(HttpResponse response, IFileInfo file, string path)
+    {
+        response.ContentType = GetContentType(path);
+        if (file.Length < 1)
+            throw new ArgumentException($"file {file.Name} does not exists");
+
+        var chunks = Math.Max(2048, file.Length / 3);
+        var buffer = new byte[chunks];
+        using var stream = new MemoryStream();
+        using var cs = file.CreateReadStream();
+        int bytesRead;
+        while ((bytesRead = cs.Read(buffer, 0, buffer.Length)) > 0)
+        {
+            stream.Write(buffer, 0, bytesRead);
+        }
+        var result = stream.ToArray();
+        await response.BodyWriter.WriteAsync(new Memory<byte>(result));
     }
 }
