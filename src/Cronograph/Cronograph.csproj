@@ -34,9 +34,14 @@
     <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
+    <PackageReference Include="NewId" Version="3.0.3" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="../../README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Cronograph.Shared\Cronograph.Shared.csproj" />
   </ItemGroup>
 </Project>

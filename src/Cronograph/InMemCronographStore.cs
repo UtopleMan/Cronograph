@@ -1,24 +1,30 @@
-﻿using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Cronograph.Shared;
+using System.Collections.Concurrent;
 
 namespace Cronograph;
 
 internal class InMemCronographStore : ICronographStore
 {
     private ConcurrentDictionary<string, Job> jobs = new();
+    private ConcurrentDictionary<string, JobRun> jobRuns = new();
 
-    public void Add(string name, Job job)
+    public void UpsertJob(Job job)
     {
-        jobs.AddOrUpdate(name, job, (name, oldJob) => job);
+        jobs.AddOrUpdate(job.Name, job, (name, oldJob) => job);
     }
-    public IEnumerable<Job> Get()
+
+    public void UpsertJobRun(JobRun jobRun)
+    {
+        jobRuns.AddOrUpdate(jobRun.Id, jobRun, (name, oldJob) => jobRun);
+    }
+
+    public IReadOnlyList<Job> GetJobs()
     {
         return jobs.Values.ToArray();
     }
 
-    public void Remove(string name)
+    public IReadOnlyList<JobRun> GetJobRuns(Job job)
     {
-        jobs.TryRemove(name, out _);
+        return jobRuns.Values.Where(x => x.JobName == job.Name).ToArray();
     }
 }

@@ -12,7 +12,7 @@ public static class Extensions
         var manifestEmbeddedProvider = new ManifestEmbeddedFileProvider(Assembly.GetExecutingAssembly());
         MapFiles(physicalDir, subPath, manifestEmbeddedProvider, applicationBuilder);
 
-        endpointBuilder.MapGet(subPath + "/jobs", (ICronographStore store) => store.Get().ToViewModel());
+        endpointBuilder.MapGet(subPath + "/jobs", (ICronographStore store) => store.GetJobs());
         endpointBuilder.Map(subPath + "/{**:nonfile}", async cnt =>
         {
             var index = manifestEmbeddedProvider.GetDirectoryContents(physicalDir).Single(x => x.Name.Contains("index.html"));
