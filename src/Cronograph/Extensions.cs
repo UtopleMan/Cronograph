@@ -13,6 +13,7 @@ public static class Extensions
         services.AddSingleton(services);
         services.AddHostedService<Cronograph>();
         services.AddSingleton<ICronographStore, InMemCronographStore>();
+        services.AddSingleton<CronographMemoryCache>();
         services.AddSingleton<IDateTime, DateTimeService>();
         return services;
     }

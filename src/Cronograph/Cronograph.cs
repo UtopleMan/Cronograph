@@ -12,28 +12,57 @@ public interface ICronograph
     void AddOneShot(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default);
     void AddScheduledService<T>(string name, string cron, TimeZoneInfo? timeZone = default) where T : IScheduledService;
 }
+public class CronographMemoryCache
+{
+    private readonly Dictionary<string, JobFunction> jobFunctions = new();
+    private readonly Dictionary<string, CronExpression> jobCronExpressions = new();
+    public void UpsertJobFunction(JobFunction jobFunction)
+    {
+        if (jobFunctions.ContainsKey(jobFunction.JobName))
+            jobFunctions[jobFunction.JobName] = jobFunction;
+        else
+            jobFunctions.Add(jobFunction.JobName, jobFunction);
+    }
+    public void UpsertCronExpression(string name, CronExpression cronExpression)
+    {
+        if (jobCronExpressions.ContainsKey(name))
+            jobCronExpressions[name] = cronExpression;
+        else
+            jobCronExpressions.Add(name, cronExpression);
+    }
+
+    internal JobFunction GetJobFunction(string name)
+    {
+        return jobFunctions[name];
+    }
+
+    internal CronExpression GetJobCronExpression(string name)
+    {
+        return jobCronExpressions[name];
+    }
+}
 public class Cronograph : BackgroundService, ICronograph
 {
     private readonly IDateTime dateTime;
     private readonly ICronographStore store;
     private readonly ILogger<Cronograph> logger;
+    private readonly CronographMemoryCache cache;
     private readonly ServiceProvider provider;
-    private readonly Dictionary<string, JobFunction> jobFunctions = new();
-    private readonly Dictionary<string, CronExpression> jobCronExpressions = new();
-    public Cronograph(IDateTime dateTime, ICronographStore store, IServiceCollection services, ILogger<Cronograph> logger)
+    public Cronograph(IDateTime dateTime, ICronographStore store, IServiceCollection services, ILogger<Cronograph> logger, CronographMemoryCache cache)
     {
         this.dateTime = dateTime;
         this.store = store;
         this.logger = logger;
+        this.cache = cache;
         this.provider = services.BuildServiceProvider();
     }
     public void AddJob(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default)
     {
         var jobFunction = CreateJobFunction(name, call);
-        UpsertJobFunction(jobFunction);
+        cache.UpsertJobFunction(jobFunction);
 
         var cronExpression = CreateCronExpression(cron);
-        UpsertCronExpression(name, cronExpression);
+        cache.UpsertCronExpression(name, cronExpression);
 
         var job = CreateJob(name, "job()", cron, timeZone);
         store.UpsertJob(job);
@@ -42,7 +71,11 @@ public class Cronograph : BackgroundService, ICronograph
     public void AddOneShot(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default)
     {
         var jobFunction = CreateJobFunction(name, call);
-        UpsertJobFunction(jobFunction);
+        cache.UpsertJobFunction(jobFunction);
+
+        var cronExpression = CreateCronExpression(cron);
+        cache.UpsertCronExpression(name, cronExpression);
+
         var job = CreateJob(name, "oneshot()", cron, timeZone);
         store.UpsertJob(job with { OneShot = true });
     }
@@ -50,24 +83,13 @@ public class Cronograph : BackgroundService, ICronograph
     {
         var service = provider.GetRequiredService<T>();
         var jobFunction = CreateJobFunction(name, service.ExecuteAsync);
-        UpsertJobFunction(jobFunction);
+        cache.UpsertJobFunction(jobFunction);
+
+        var cronExpression = CreateCronExpression(cron);
+        cache.UpsertCronExpression(name, cronExpression);
 
         var job = CreateJob(name, service.GetType().FullName, cron, timeZone);
         store.UpsertJob(job);
-    }
-    private void UpsertJobFunction(JobFunction jobFunction)
-    {
-        if (jobFunctions.ContainsKey(jobFunction.JobName))
-            jobFunctions[jobFunction.JobName] = jobFunction;
-        else
-            jobFunctions.Add(jobFunction.JobName, jobFunction);
-    }
-    private void UpsertCronExpression(string name, CronExpression cronExpression)
-    {
-        if (jobCronExpressions.ContainsKey(name))
-            jobCronExpressions[name] = cronExpression;
-        else
-            jobCronExpressions.Add(name, cronExpression);
     }
 
     private Job CreateJob(string name, string className, string cron, TimeZoneInfo? timeZone)
@@ -98,8 +120,10 @@ public class Cronograph : BackgroundService, ICronograph
             await Task.Delay(msToJob, stoppingToken);
             if (stoppingToken.IsCancellationRequested)
                 return;
-            foreach (var job in jobs.Where(x => x.State != JobStates.Running))
+            foreach (var job in jobs.Where(x => x.State != JobStates.Running && x.State != JobStates.Stopped))
             {
+                var runningJob = job with { State = JobStates.Running };
+                store.UpsertJob(runningJob);
                                                         #pragma warning disable CS4014
                 Task.Run(
                     async () =>
@@ -118,21 +142,19 @@ public class Cronograph : BackgroundService, ICronograph
         var run = new JobRun(GetId(), job.Name, JobRunStates.Running, start);
         store.UpsertJobRun(run);
 
-        var runningJob = job with { State = JobStates.Running };
-        store.UpsertJob(runningJob);
 
-        var jobFunction = jobFunctions[runningJob.Name];
+        var jobFunction = cache.GetJobFunction(job.Name);
 
         try
         {
             await jobFunction.Action(stoppingToken);
 
-            if (runningJob.OneShot == true)
-                runningJob = runningJob with { State = JobStates.Stopped };
+            if (job.OneShot == true)
+                job = job with { State = JobStates.Stopped };
             else
-                runningJob = runningJob with { State = JobStates.Finished };
-            runningJob = runningJob with { LastJobRunState = JobRunStates.Success, LastJobRunMessage = "" };
-            store.UpsertJob(runningJob);
+                job = job with { State = JobStates.Finished };
+            job = job with { LastJobRunState = JobRunStates.Success, LastJobRunMessage = "" };
+            store.UpsertJob(job);
 
             run = run with { State = JobRunStates.Success, End = dateTime.UtcNow };
             store.UpsertJobRun(run);
@@ -145,12 +167,7 @@ public class Cronograph : BackgroundService, ICronograph
             run = run with { State = JobRunStates.Failed, End = dateTime.UtcNow, ErrorMessage = errorMessage, ExceptionDetails = exception.ToString() };
             store.UpsertJobRun(run);
 
-            runningJob = runningJob with { LastJobRunState = JobRunStates.Failed, LastJobRunMessage = errorMessage };
-            store.UpsertJob(runningJob);
-        }
-        finally
-        {
-            job = job with { State = JobStates.Finished };
+            job = job with { LastJobRunState = JobRunStates.Failed, LastJobRunMessage = errorMessage };
             store.UpsertJob(job);
         }
     }
@@ -162,7 +179,7 @@ public class Cronograph : BackgroundService, ICronograph
     {
         var currentTime = dateTime.UtcNow;
         var jobs = store.GetJobs();
-        var nextOccurence = jobs.Min(x => jobCronExpressions[x.Name].GetNextOccurrence(currentTime, TimeZoneInfo.Utc));
+        var nextOccurence = jobs.Min(x => cache.GetJobCronExpression(x.Name).GetNextOccurrence(currentTime, TimeZoneInfo.Utc));
         if (nextOccurence == null)
             return (new List<Job>(), 1000);
 
@@ -170,7 +187,7 @@ public class Cronograph : BackgroundService, ICronograph
 
         foreach (var job in jobs)
         {
-            if (jobCronExpressions[job.Name].GetNextOccurrence(currentTime, TimeZoneInfo.Utc) == nextOccurence)
+            if (cache.GetJobCronExpression(job.Name).GetNextOccurrence(currentTime, TimeZoneInfo.Utc) == nextOccurence)
                 nextJobs.Add(job);
         }
         return (nextJobs, (int)((nextOccurence - currentTime).Value.TotalMilliseconds));

@@ -1,12 +1,164 @@
-﻿@page "/"
+﻿@using Cronograph.Shared;
+@using Microsoft.Fast.Components.FluentUI
+@using System.Linq
 
-<PageTitle>Index</PageTitle>
+@inject HttpClient Http
+@page "/"
+<style>
+    fluent-badge {
+        --badge-fill-highlight: #ffd800;
+        --badge-fill-lowlight: #333;
+        --badge-color-highlight: #000;
+        --badge-color-lowlight: #fff;
+    }
+</style>
+<FluentToolbar id="toolbar-fluent-components-two" style="width:100%">
+    <FluentTextField slot="start" @oninput="FilterChanged"></FluentTextField>
+    <FluentCombobox slot="end" Appearance="Appearance.Filled" Options=@contexts @bind-Value="@selectedContext" style="margin-right: 5px;"></FluentCombobox>
+    <FluentCombobox slot="end" Appearance="Appearance.Filled" Options=@namespaces @bind-Value="@namespaceName"></FluentCombobox>
+</FluentToolbar>
+<FluentDataGrid id="grid" GridTemplateColumns="85px 160px 8fr 130px 85px" RowsData=DisplayedRows ColumnDefinitions=Columns @ref=grid>
+    <RowItemTemplate>
+        <FluentDataGridRow>
+            <FluentDataGridCell GridColumn=1>
+                @if (context.State == JobStates.Finished)
+                {
+                    <FluentBadge Appearance="Appearance.Accent">
+                        Finished
+                    </FluentBadge>
+                }
+                else if (context.State == JobStates.Running)
+                {
+                    <FluentProgressRing></FluentProgressRing>
+                }
+                else if (context.State == JobStates.Waiting)
+                {
+                    <FluentBadge Fill="lowlight" Color="lowlight">
+                        Waiting
+                    </FluentBadge>
+                }
+                else if (context.State == JobStates.Stopped)
+                {
+                    <FluentBadge Fill="highlight" Color="highlight">
+                        Stopped
+                    </FluentBadge>
+                }
+            </FluentDataGridCell>
+            <FluentDataGridCell GridColumn=2>
+                @context.Name
+            </FluentDataGridCell>
+            <FluentDataGridCell GridColumn=3>
+                @context.LastJobRunMessage
+            </FluentDataGridCell>
+            <FluentDataGridCell GridColumn=4>
+                @context.NextJobRunTime.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
+            </FluentDataGridCell>
+            <FluentDataGridCell GridColumn=5>
+                @if (context.State == JobStates.Stopped)
+                {
+                    <FluentButton @onclick="() => Start(context.Name)">Start</FluentButton>
+                }
+                else if (context.State != JobStates.Running)
+                {
+                    <FluentButton @onclick="() => Stop(context.Name)">Pause</FluentButton>
+                }
+            </FluentDataGridCell>
+        </FluentDataGridRow>
+    </RowItemTemplate>
+</FluentDataGrid>
 
-<h1>Hello, world!</h1>
+@code {
+    private List<ColumnDefinition<Job>> Columns = new();
+    private FluentDataGrid<Job> grid;
+    private List<Option<string>> contexts = new();
+    private List<Job> Rows = new();
+    private List<Job> DisplayedRows = new();
+    private List<Option<string>> namespaces = new();
+    private Timer timer;
+    private string namespaceName = "flux-system";
+    private string selectedContext = "";
+    private bool disposed = false;
+    private string filter = "";
 
-Welcome to your new app.
+    void LocationChanged(object sender, LocationChangedEventArgs e)
+    {
+        timer.Dispose();
+    }
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            timer = new Timer(async state => { await InvokeAsync(UpdateView); }, null, 0, 1000);
+        }
+        return Task.CompletedTask;
+    }
+    private async Task UpdateView()
+    {
+        var newRows = await GetJobs();
+        var changedRows = new List<Job>();
+        foreach (var row in newRows)
+            if (!Rows.Any(x => x == row))
+                changedRows.Add(row);
 
-<SurveyPrompt Title="How is Blazor working for you?" />
-@code{
-    //forecasts = await Http.GetFromJsonAsync<Job[]>("jobs");
+        if (!changedRows.Any()) return;
+
+        Rows = newRows.ToList();
+        DisplayedRows = Rows.Where(x => (x.ClassName + x.Name).Contains(filter)).OrderBy(x => x.ClassName + x.Name).ToList();
+        StateHasChanged();
+    }
+    protected async Task<List<Job>> GetJobs()
+    {
+        return (await Http.GetFromJsonAsync<Job[]>("/cronographapi/jobs"))?.ToList() ?? new List<Job>();
+    }
+    protected async Task Stop(string name)
+    {
+        await Http.PostAsJsonAsync("/cronographapi/jobs/stop", new { Name = name });
+    }
+    protected async Task Pause(string name)
+    {
+        await Http.PostAsJsonAsync("/cronographapi/jobs/pause", new { Name = name });
+    }
+    protected async Task Start(string name)
+    {
+        await Http.PostAsJsonAsync("/cronographapi/jobs/start", new { Name = name });
+    }
+    public void Dispose() => Dispose(true);
+
+    public void Dispose(bool disposing)
+    {
+        if (disposed) return;
+        timer.Dispose();
+        disposed = true;
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        Columns.Add(new ColumnDefinition<Job>("", x => x.State));
+        Columns.Add(new ColumnDefinition<Job>("Name", x => x.Name));
+        Columns.Add(new ColumnDefinition<Job>("Message", x => x.LastJobRunMessage));
+        Columns.Add(new ColumnDefinition<Job>("Time", x => x.LastJobRunTime));
+        Columns.Add(new ColumnDefinition<Job>("Cron", x => x.CronString));
+
+        Rows = await GetJobs();
+        DisplayedRows = Rows.ToList();
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+    }
+
+    private void FilterChanged(ChangeEventArgs args)
+    {
+        filter = args.Value as string;
+
+        if (string.IsNullOrWhiteSpace(filter))
+        {
+            DisplayedRows = Rows;
+        }
+        else
+        {
+            DisplayedRows = Rows.Where(x => (x.ClassName + x.Name).Contains(filter)).ToList();
+        }
+    }
 }

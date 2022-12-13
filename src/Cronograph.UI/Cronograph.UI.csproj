@@ -34,6 +34,13 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Remove="source\**" />
+    <Content Remove="source\**" />
+    <EmbeddedResource Remove="source\**" />
+    <None Remove="source\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="../../README.md" Pack="true" PackagePath="\" />
@@ -45,6 +52,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Cronograph.Shared\Cronograph.Shared.csproj" />
     <ProjectReference Include="..\Cronograph\Cronograph.csproj" />
   </ItemGroup>
 

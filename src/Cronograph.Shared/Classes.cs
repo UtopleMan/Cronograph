@@ -1,10 +1,10 @@
 ﻿namespace Cronograph.Shared;
 
-public record Job(string Name, string ClassName, string CronString, TimeZoneInfo TimeZone,
-    bool OneShot, JobStates State, JobRunStates LastJobRunState, string LastJobRunMessage)
+public record Job(string Name, string ClassName, string CronString, TimeZoneInfo TimeZone, DateTimeOffset NextJobRunTime,
+    bool OneShot, JobStates State, JobRunStates LastJobRunState, string LastJobRunMessage, DateTimeOffset LastJobRunTime)
 {
     public Job(string Name, string ClassName, string CronString, TimeZoneInfo TimeZone) :
-        this(Name, ClassName, CronString, TimeZone, false, JobStates.Waiting, JobRunStates.None, "")
+        this(Name, ClassName, CronString, TimeZone, DateTimeOffset.MinValue, false, JobStates.Waiting, JobRunStates.None, "", DateTimeOffset.MinValue)
     { }
 }
 public record JobFunction(string JobName, Func<CancellationToken, Task> Action);
