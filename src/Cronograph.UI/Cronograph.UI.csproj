@@ -54,7 +54,7 @@
 			<ProjectReference Include="..\Cronograph.Shared\Cronograph.Shared.csproj" >
 					<PrivateAssets>all</PrivateAssets>
 			</ProjectReference>
-    <ProjectReference Include="..\Cronograph\Cronograph.csproj" />
+    <!--<ProjectReference Include="..\Cronograph\Cronograph.csproj" />-->
   </ItemGroup>
 
   <ItemGroup>
