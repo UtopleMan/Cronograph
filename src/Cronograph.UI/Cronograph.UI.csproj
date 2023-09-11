@@ -48,14 +48,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="7.0.0" />
     <PackageReference Include="MimeTypeMapOfficial" Version="1.0.17" />
-  </ItemGroup>
-
-  <ItemGroup>
-			<ProjectReference Include="..\Cronograph.Shared\Cronograph.Shared.csproj" >
-					<PrivateAssets>all</PrivateAssets>
-			</ProjectReference>
-    <!--<ProjectReference Include="..\Cronograph\Cronograph.csproj" />-->
-  </ItemGroup>
+			<PackageReference Include="Cronograph" Version="1.0.*" />
+	</ItemGroup>
 
   <ItemGroup>
     <Folder Include="wwwroot\" />
