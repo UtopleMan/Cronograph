@@ -34,7 +34,7 @@ jobs:
       run: |
         dotnet pack src/Cronograph.Shared/Cronograph.Shared.csproj -o packages --configuration Release --no-build --verbosity normal -p:PackageVersion=1.0.${{ github.run_number }}
         dotnet pack src/Cronograph/Cronograph.csproj -o packages --configuration Release --no-build --verbosity normal -p:PackageVersion=1.0.${{ github.run_number }}
-        dotnet pack src/Cronograph.UI/Cronograph.UI/Cronograph.UI.csproj -o packages --configuration Release --no-build --verbosity normal -p:PackageVersion=1.0.${{ github.run_number }}
+        dotnet pack src/Cronograph.UI/Cronograph.UI.csproj -o packages --configuration Release --no-build --verbosity normal -p:PackageVersion=1.0.${{ github.run_number }}
     - name: Push
       run: |
        dotnet nuget push packages/Cronograph.1.0.${{ github.run_number }}.nupkg -k ${{ secrets.NUGET_APIKEY }} -s https://api.nuget.org/v3/index.json
