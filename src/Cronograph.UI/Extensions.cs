@@ -1,5 +1,4 @@
-﻿using Cronograph.Shared;
-using Microsoft.Extensions.FileProviders;
+﻿using Microsoft.Extensions.FileProviders;
 using MimeTypes;
 using System.Reflection;
 

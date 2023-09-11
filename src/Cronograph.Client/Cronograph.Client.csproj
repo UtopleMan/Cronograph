@@ -17,4 +17,8 @@
     <PackageReference Include="Microsoft.Fast.Components.FluentUI" Version="1.6.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Cronograph.Shared\Cronograph.Shared.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cronograph.UI", "Cronograph
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cronograph.Client", "Cronograph.Client\Cronograph.Client.csproj", "{23330D97-F05C-49F2-ABF9-9206983A5D32}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cronograph.Shared", "Cronograph.Shared\Cronograph.Shared.csproj", "{FC98E7B7-0048-4B16-9408-FE44CC02478D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{23330D97-F05C-49F2-ABF9-9206983A5D32}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{23330D97-F05C-49F2-ABF9-9206983A5D32}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{23330D97-F05C-49F2-ABF9-9206983A5D32}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC98E7B7-0048-4B16-9408-FE44CC02478D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC98E7B7-0048-4B16-9408-FE44CC02478D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC98E7B7-0048-4B16-9408-FE44CC02478D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC98E7B7-0048-4B16-9408-FE44CC02478D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
