@@ -26,7 +26,6 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <Description>Cronograph is a simple Cronjob runner created as a HangFire replacement. Cronograph is easily testable and integrates well into Microsoft.Extensions.DependencyInjection</Description>
     <Copyright>Copyright 2022</Copyright>
-
   </PropertyGroup>
   
   <ItemGroup>
@@ -52,7 +51,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Cronograph.Shared\Cronograph.Shared.csproj" />
+			<ProjectReference Include="..\Cronograph.Shared\Cronograph.Shared.csproj" >
+					<PrivateAssets>all</PrivateAssets>
+			</ProjectReference>
     <ProjectReference Include="..\Cronograph\Cronograph.csproj" />
   </ItemGroup>
 
