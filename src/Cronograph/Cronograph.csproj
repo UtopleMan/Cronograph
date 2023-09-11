@@ -40,7 +40,11 @@
   <ItemGroup>
     <None Include="../../README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
-
+		<ItemGroup>
+				<Compile Remove="source\**" />
+				<EmbeddedResource Remove="source\**" />
+				<None Remove="source\**" />
+		</ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Cronograph.Shared\Cronograph.Shared.csproj" />
   </ItemGroup>

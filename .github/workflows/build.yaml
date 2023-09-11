@@ -21,6 +21,8 @@ jobs:
         cp src/Cronograph/Cronograph.final.csproj src/Cronograph/Cronograph.csproj
         sed 's/9999/'${{ github.run_number }}-alpha'/g' src/Cronograph.UI/Cronograph.UI.csproj > src/Cronograph.UI/Cronograph.UI.final.csproj
         cp src/Cronograph.UI/Cronograph.UI.final.csproj src/Cronograph.UI/Cronograph.UI.csproj
+        sed 's/9999/'${{ github.run_number }}-alpha'/g' src/Cronograph.Shared/Cronograph.Shared.csproj > src/Cronograph.Shared/Cronograph.Shared.final.csproj
+        cp src/Cronograph.UI/Cronograph.UI.final.csproj src/Cronograph.Shared/Cronograph.Shared.csproj
     - name: Build
       run: dotnet build src --configuration Release
     - name: Test
@@ -31,3 +33,4 @@ jobs:
       run: |
        dotnet nuget push packages/Cronograph.1.0.${{ github.run_number }}.nupkg -k ${{ secrets.NUGET_APIKEY }} -s https://api.nuget.org/v3/index.json
        dotnet nuget push packages/Cronograph.UI.1.0.${{ github.run_number }}.nupkg -k ${{ secrets.NUGET_APIKEY }} -s https://api.nuget.org/v3/index.json
+       dotnet nuget push packages/Cronograph.Shared.1.0.${{ github.run_number }}.nupkg -k ${{ secrets.NUGET_APIKEY }} -s https://api.nuget.org/v3/index.json
