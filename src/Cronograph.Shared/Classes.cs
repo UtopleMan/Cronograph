@@ -29,3 +29,10 @@ public enum JobStates
     Finished,
     Stopped
 }
+public interface ICronographStore
+{
+    void UpsertJob(Job job);
+    void UpsertJobRun(JobRun jobRun);
+    IReadOnlyList<Job> GetJobs();
+    IReadOnlyList<JobRun> GetJobRuns(Job job);
+}

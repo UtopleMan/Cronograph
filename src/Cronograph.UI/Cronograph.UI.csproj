@@ -52,7 +52,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Cronograph.Shared\Cronograph.Shared.csproj" />
-    <ProjectReference Include="..\Cronograph\Cronograph.csproj" />
   </ItemGroup>
 
   <ItemGroup>
