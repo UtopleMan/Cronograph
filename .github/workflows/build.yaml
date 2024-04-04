@@ -30,7 +30,7 @@ jobs:
       run: |
         dotnet build src/Cronograph.Shared/Cronograph.Shared.csproj --configuration Release
         dotnet build src/Cronograph/Cronograph.csproj --configuration Release
-        dotnet publish src/Cronograph.Client/Cronograph.Client.csproj --configuration Release
+        dotnet build src/Cronograph.Client/Cronograph.Client.csproj --configuration Release
         dotnet build src/Cronograph.UI/Cronograph.UI.csproj --configuration Release
     - name: Test
       run: dotnet test src --configuration Release --no-build --verbosity normal
