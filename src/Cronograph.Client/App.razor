@@ -1,4 +1,4 @@
-﻿<FluentDesignSystemProvider AccentBaseColor="#464EB8" BaseLayerLuminance="0">
+﻿@* <FluentDesignSystemProvider AccentBaseColor="#464EB8" BaseLayerLuminance="0">
 	<Router AppAssembly="@typeof(App).Assembly">
 		<Found Context="routeData">
 			<RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
@@ -11,3 +11,15 @@
 		</NotFound>
 	</Router>
 </FluentDesignSystemProvider>
+ *@
+<Router AppAssembly="@typeof(App).Assembly">
+	<Found Context="routeData">
+		<RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+	</Found>
+	<NotFound>
+		<PageTitle>Not found</PageTitle>
+		<LayoutView Layout="@typeof(MainLayout)">
+			<p role="alert">Sorry, there's nothing at this address.</p>
+		</LayoutView>
+	</NotFound>
+</Router>
