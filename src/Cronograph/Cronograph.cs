@@ -98,7 +98,7 @@ public class Cronograph : BackgroundService, ICronograph
         if (usedTimeZone == default)
             usedTimeZone = TimeZoneInfo.Utc;
 
-        return new Job(name, className, cron, usedTimeZone);
+        return new Job(name, className, cron, usedTimeZone.BaseUtcOffset.Minutes);
     }
     private JobFunction CreateJobFunction(string jobName, Func<CancellationToken, Task> call)
     {
@@ -137,8 +137,8 @@ public class Cronograph : BackgroundService, ICronograph
                     logger.LogDebug("Started job [{job}]", job.Name);
                 }
                 
-                var jobs = store.GetJobs();
-                logger.LogDebug("Current job states are [{jobs}]", jobs.Select(x => x.Name + ":" + x.State).Aggregate((c, n) => c + ", " + n));
+                var allJobs = store.GetJobs();
+                logger.LogDebug("Current job states are [{allJobs}]", allJobs.Select(x => x.Name + ":" + x.State).Aggregate((c, n) => c + ", " + n));
             }
             catch (Exception exception)
             {

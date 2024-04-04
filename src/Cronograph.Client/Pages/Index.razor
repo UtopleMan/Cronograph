@@ -103,24 +103,22 @@
     {
         Console.WriteLine("Hej");
 
-        var x = await Http.GetAsync("/cronographapi/jobs");
-
-        var content = await x.Content.ReadAsStringAsync();
-        var list = JsonSerializer.Deserialize<List<Job>>(content);
-        Console.WriteLine(list);
-        return list ?? new List<Job>();
+        var list = await Http.GetFromJsonAsync<Job[]>("/cronograph/jobs");
+        foreach (var job in list)
+            Console.WriteLine(job);
+        return list.ToList() ?? new();
     }
     protected async Task Stop(string name)
     {
-        await Http.PostAsJsonAsync("/cronographapi/jobs/stop", new { Name = name });
+        await Http.PostAsJsonAsync("/cronograph/jobs/stop", new { Name = name });
     }
     protected async Task Pause(string name)
     {
-        await Http.PostAsJsonAsync("/cronographapi/jobs/pause", new { Name = name });
+        await Http.PostAsJsonAsync("/cronograph/jobs/pause", new { Name = name });
     }
     protected async Task Start(string name)
     {
-        await Http.PostAsJsonAsync("/cronographapi/jobs/start", new { Name = name });
+        await Http.PostAsJsonAsync("/cronograph/jobs/start", new { Name = name });
     }
     public void Dispose() => Dispose(true);
 

@@ -3,7 +3,7 @@
 public record Job
 {
     public Job() { }
-    public Job(string Name, string ClassName, string CronString, TimeZoneInfo TimeZone)
+    public Job(string Name, string ClassName, string CronString, int TimeZone)
     {
         this.Name = Name;
         this.ClassName = ClassName;
@@ -19,7 +19,7 @@ public record Job
     public string Name {get;set;}
     public string ClassName {get;set;}
     public string CronString {get;set;}
-    public TimeZoneInfo TimeZone {get;set;}
+    public int TimeZone {get;set;}
     public DateTimeOffset NextJobRunTime {get;set;}
     public bool OneShot {get;set;}
     public JobStates State {get;set;}
