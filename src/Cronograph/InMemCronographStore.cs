@@ -18,13 +18,13 @@ internal class InMemCronographStore : ICronographStore
         jobRuns.AddOrUpdate(jobRun.Id, jobRun, (name, oldJob) => jobRun);
     }
 
-    public IReadOnlyList<Job> GetJobs()
+    public List<Job> GetJobs()
     {
-        return jobs.Values.ToArray();
+        return jobs.Values.ToList();
     }
 
-    public IReadOnlyList<JobRun> GetJobRuns(Job job)
+    public List<JobRun> GetJobRuns(Job job)
     {
-        return jobRuns.Values.Where(x => x.JobName == job.Name).ToArray();
+        return jobRuns.Values.Where(x => x.JobName == job.Name).ToList();
     }
 }

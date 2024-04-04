@@ -18,7 +18,7 @@
     <PackageProjectUrl>https://github.com/UtopleMan/Cronograph</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageOutputPath>./source/workspace/packages</PackageOutputPath>
+    <PackageOutputPath>./packages</PackageOutputPath>
     <PackageTags>Batch, HangFire, Job, CronTab, Cron</PackageTags>
     <RepositoryUrl>https://github.com/UtopleMan/Cronograph</RepositoryUrl>
     <IsPackable>true</IsPackable>
@@ -30,15 +30,15 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <EmbeddedResource Include="wwwroot\**\*">
+    <EmbeddedResource Include="..\Cronograph.Client\obj\Debug\net7.0\browser-wasm\PubTmp\Out\**\*">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
   
   <ItemGroup>
-			<Compile Remove="source\**" />
-			<EmbeddedResource Remove="source\**" />
-			<None Remove="source\**" />
+			<Compile Remove="packages\**" />
+			<EmbeddedResource Remove="packages\**" />
+			<None Remove="packages\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -52,9 +52,5 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Cronograph.Shared\Cronograph.Shared.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="wwwroot\" />
   </ItemGroup>
 </Project>

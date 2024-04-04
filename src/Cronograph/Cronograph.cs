@@ -115,23 +115,34 @@ public class Cronograph : BackgroundService, ICronograph
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            (var jobs, var msToJob) = GetNextJobSchedule();
-
-            await Task.Delay(msToJob, stoppingToken);
-            if (stoppingToken.IsCancellationRequested)
-                return;
-            foreach (var job in jobs.Where(x => x.State != JobStates.Running && x.State != JobStates.Stopped))
+            try
             {
-                var runningJob = job with { State = JobStates.Running };
-                store.UpsertJob(runningJob);
-                                                        #pragma warning disable CS4014
-                Task.Run(
-                    async () =>
-                    {
-                        await RunAction(job, stoppingToken);
-                    },
-                    stoppingToken);
-                                                        #pragma warning restore CS4014
+                (var jobs, var msToJob) = GetNextJobSchedule();
+                logger.LogDebug("Next job(s) are [{jobs}]. Starting in {msToJob} ms", jobs.Select(x => x.Name).Aggregate((c, n) => c + ", " + n), msToJob);
+                await Task.Delay(msToJob, stoppingToken);
+                if (stoppingToken.IsCancellationRequested)
+                    return;
+                foreach (var job in jobs.Where(x => x.State != JobStates.Running && x.State != JobStates.Stopped))
+                {
+                    var runningJob = job with { State = JobStates.Running };
+                    store.UpsertJob(runningJob);
+#pragma warning disable CS4014
+                    Task.Run(
+                        async () =>
+                        {
+                            await RunAction(job, stoppingToken);
+                        },
+                        stoppingToken);
+#pragma warning restore CS4014
+                    logger.LogDebug("Started job [{job}]", job.Name);
+                }
+                
+                var jobs = store.GetJobs();
+                logger.LogDebug("Current job states are [{jobs}]", jobs.Select(x => x.Name + ":" + x.State).Aggregate((c, n) => c + ", " + n));
+            }
+            catch (Exception exception)
+            {
+                logger.LogWarning(exception, "Error caught in Cronograph.ExecuteAsync(). Continuing");
             }
         }
     }
