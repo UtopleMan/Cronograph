@@ -118,7 +118,7 @@ public class Cronograph : BackgroundService, ICronograph
             try
             {
                 (var jobs, var msToJob) = GetNextJobSchedule();
-                logger.LogDebug("Next job(s) are [{jobs}]. Starting in {msToJob} ms", jobs.Select(x => x.Name).Aggregate((c, n) => c + ", " + n), msToJob);
+                logger.LogTrace("Next job(s) are [{jobs}]. Starting in {msToJob} ms", jobs.Select(x => x.Name).Aggregate((c, n) => c + ", " + n), msToJob);
                 await Task.Delay(msToJob, stoppingToken);
                 if (stoppingToken.IsCancellationRequested)
                     return;
@@ -134,11 +134,11 @@ public class Cronograph : BackgroundService, ICronograph
                         },
                         stoppingToken);
 #pragma warning restore CS4014
-                    logger.LogDebug("Started job [{job}]", job.Name);
+                    logger.LogInformation("Started job [{job}]", job.Name);
                 }
                 
                 var allJobs = store.GetJobs();
-                logger.LogDebug("Current job states are [{allJobs}]", allJobs.Select(x => x.Name + ":" + x.State).Aggregate((c, n) => c + ", " + n));
+                logger.LogTrace("Current job states are [{allJobs}]", allJobs.Select(x => x.Name + ":" + x.State).Aggregate((c, n) => c + ", " + n));
             }
             catch (Exception exception)
             {

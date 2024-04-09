@@ -1,0 +1,1203 @@
+/* _content/Havit.Blazor.Components.Web.Bootstrap/Buttons/HxButton.razor.rz.scp.css */
+[b-np76lu746f] .hx-button-icon-text-spacer {
+	margin-right: var(--hx-button-icon-text-spacer-width);
+}
+
+[b-np76lu746f] .hx-button-text-icon-spacer {
+	margin-left: var(--hx-button-icon-text-spacer-width);
+}
+/* _content/Havit.Blazor.Components.Web.Bootstrap/Calendar/HxCalendar.razor.rz.scp.css */
+.hx-calendar[b-uq8tfob39y] {
+    display: inline-flex;
+    flex-direction: column;
+}
+
+.hx-calendar-navigation[b-uq8tfob39y] {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+[b-uq8tfob39y] .hx-calendar-navigation-button {
+    --bs-btn-padding-y: 0.25rem;
+    --bs-btn-padding-x: 0.5rem;
+    --bs-btn-font-size: 1rem;
+    color: var(--hx-calendar-navigation-button-text-color);
+    border: none;
+}
+
+[b-uq8tfob39y] .hx-calendar-navigation-button:focus {
+    box-shadow: var(--hx-calendar-navigation-button-focus-box-shadow);
+}
+
+.hx-calendar-month-year-select[b-uq8tfob39y] {
+    display: inline-flex;
+}
+
+.form-select[b-uq8tfob39y] {
+    margin: 0 .125rem;
+    padding: 0.25rem 1.75rem 0.25rem 0.5rem;
+    background-size: 9px 9px;
+    cursor: pointer;
+}
+
+.form-select:not(:hover)[b-uq8tfob39y] {
+    background-image: none;
+    background-color: transparent;
+    width: fit-content;
+    border-color: transparent;
+    transition: all 0.15s ease-in-out;
+}
+
+[b-uq8tfob39y] .btn:hover {
+    background-color: var(--hx-calendar-navigation-button-hover-background);
+}
+
+.form-select:focus:not(:hover)[b-uq8tfob39y] {
+    box-shadow: none;
+}
+
+td[b-uq8tfob39y] {
+    padding: var(--hx-calendar-day-spacing);
+    text-align: center;
+}
+
+td > div[b-uq8tfob39y] {
+    border: var(--hx-calendar-day-border-radius);
+    border-radius: var(--hx-calendar-day-border-radius);
+    background-color: transparent;
+    transition: all .15s ease-in-out;
+}
+
+.hx-calendar-week div[b-uq8tfob39y] {
+    width: var(--hx-calendar-day-width);
+    height: var(--hx-calendar-day-height);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: var(--hx-calendar-font-size);
+}
+
+.hx-calendar-day-names td[b-uq8tfob39y] {
+    color: var(--hx-calendar-day-names-color);  
+    font-size: .75rem;
+    font-weight: var(--hx-calendar-day-names-font-weight);
+}
+
+.out[b-uq8tfob39y] {
+    color: var(--hx-calendar-day-out-color);
+}
+
+.in[b-uq8tfob39y] {
+    color: var(--hx-calendar-day-in-color);
+}
+
+.disabled[b-uq8tfob39y] {
+    opacity: var(--hx-calendar-day-disabled-opacity);
+    text-decoration: var(--hx-calendar-day-disabled-text-decoration);
+    cursor: not-allowed;
+}
+
+td[role="button"]:hover .selected.in[b-uq8tfob39y], 
+td[role="button"] .selected.in[b-uq8tfob39y], 
+td[role="button"]:hover .selected.out[b-uq8tfob39y], 
+td[role="button"] .selected.out[b-uq8tfob39y] {
+    background: var(--hx-calendar-day-selected-background);
+    color: var(--hx-calendar-day-selected-color);
+    border: var(--hx-calendar-day-selected-border);
+}
+
+.hx-calendar-today[b-uq8tfob39y] {
+    border: var(--hx-calendar-day-today-border);
+    background-color: rgba(var(--hx-calendar-day-today-background), var(--hx-calendar-day-today-background-opacity));
+    color: var(--hx-calendar-day-today-color);
+}
+
+.hx-calendar-week td[role="button"]:hover div[b-uq8tfob39y] {
+    background: var(--hx-calendar-day-hover-background);
+    color: unset;
+    border: var(--hx-calendar-day-hover-border);
+}
+/* _content/Havit.Blazor.Components.Web.Bootstrap/Chips/HxChipList.razor.rz.scp.css */
+.hx-chip-list[b-0ru8qqxa5p] {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--hx-chip-list-gap);
+}
+[b-0ru8qqxa5p] .badge {
+    display: inline-flex;
+    align-items: center;
+}
+
+ .hx-chip-list-remove-btn[b-0ru8qqxa5p] {
+    display: flex;
+    align-items: center;
+    margin: var(--hx-chip-list-chip-remove-btn-margin);
+    opacity: var(--hx-chip-list-chip-remove-btn-opacity);
+}
+
+[b-0ru8qqxa5p] .hx-chip-list-remove-btn .hx-icon {
+    display: flex;
+}
+
+[b-0ru8qqxa5p] .hx-chip-list-remove-btn:hover {
+    opacity: 1;
+}
+
+[b-0ru8qqxa5p] .hx-chip-list-label {
+    font-weight: var(--hx-chip-list-chip-label-font-weight);
+    margin-right: var(--hx-chip-list-chip-label-margin);
+    opacity: var(--hx-chip-list-chip-label-opacity);
+}
+
+.hx-chip-list-reset-btn[b-0ru8qqxa5p] {
+    display: flex;
+    align-items: center;
+    font-size: .75em;
+    line-height: 1;
+    color: var(--bs-secondary);
+    padding: var(--hx-chip-list-chip-reset-btn-padding);
+}
+/* _content/Havit.Blazor.Components.Web.Bootstrap/ContextMenus/HxContextMenu.razor.rz.scp.css */
+.hx-context-menu-btn[b-eznrxray2a] {
+    color: var(--hx-context-menu-button-color);
+    border: var(--hx-context-menu-button-border);
+    border-radius: var(--hx-context-menu-button-border-radius);
+    padding: var(--hx-context-menu-button-padding);
+}
+
+.hx-context-menu-btn:hover[b-eznrxray2a] {
+    background: var(--hx-context-menu-button-hover-background);
+}
+
+.hx-context-menu[b-eznrxray2a] {
+    display: inline-block;
+}
+
+tr .hx-context-menu[b-eznrxray2a] {
+    opacity: 0;
+}
+
+tr:hover .hx-context-menu[b-eznrxray2a] {
+    opacity: 1;
+}
+/* _content/Havit.Blazor.Components.Web.Bootstrap/ContextMenus/HxContextMenuItem.razor.rz.scp.css */
+a[b-mo5ybhq3h9] {
+    display: flex;
+    align-items: center;
+}
+
+[b-mo5ybhq3h9] .hx-context-menu-item-icon {
+    margin: var(--hx-context-menu-item-icon-margin);
+}
+/* _content/Havit.Blazor.Components.Web.Bootstrap/Files/HxInputFileDropZone.razor.rz.scp.css */
+.hx-input-file-drop-zone[b-pju4gl6snf] {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: var(--hx-input-file-drop-zone-mgargin);
+    padding: var(--hx-input-file-drop-zone-padding);
+	border: var(--hx-input-file-drop-zone-border-width) dashed var(--hx-input-file-drop-zone-border-color);
+    border-radius: var(--hx-input-file-drop-zone-border-radius);
+    background-color: var(--hx-input-file-drop-zone-background-color);
+}
+
+.hx-input-file-drop-zone.disabled[b-pju4gl6snf] {
+	background-color: var(--hx-input-file-drop-zone-disabled-background-color);
+}
+
+.hx-input-file-drop-zone:not(.disabled):hover[b-pju4gl6snf], .hx-input-file-drop-zone:not(.disabled):focus[b-pju4gl6snf] {
+	background-color: var(--hx-input-file-drop-zone-hover-background-color);
+	border-color: var(--hx-input-file-drop-zone-hover-border-color);
+	box-shadow: var(--hx-input-file-drop-zone-hover-box-shadow);
+}
+
+.hx-input-file-drop-zone[b-pju4gl6snf]  input[type=file] {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+}
+
+.hx-input-file-drop-zone:not(.disabled)[b-pju4gl6snf]  input[type=file] {
+	cursor: pointer;
+}
+/* _content/Havit.Blazor.Components.Web.Bootstrap/Forms/Autosuggests/Internal/HxAutosuggestInputInternal.razor.rz.scp.css */
+.hx-autosuggest-input[b-ygo8zo3ada] {
+    position: relative;
+}
+
+.form-control.is-invalid[b-ygo8zo3ada] {
+    background-position: center right 2.5rem;
+    padding-right: 4.125rem;
+}
+/* _content/Havit.Blazor.Components.Web.Bootstrap/Forms/Autosuggests/Internal/HxAutosuggestInternal.razor.rz.scp.css */
+.hx-autosuggest-input-icon[b-k26x0s28yy] {
+    display: flex;
+    align-items: center;
+    margin-right: 1rem;
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+}
+
+.hx-autosuggest-input-wrapper:focus-within[b-k26x0s28yy] {
+	z-index: 6;
+}
+
+.input-group .hx-autosuggest-input-wrapper[b-k26x0s28yy] {
+    position: relative;
+    flex: 1 1 auto;
+    width: 1%;
+    min-width: 0;
+}
+
+.input-group .hx-autosuggest-input-wrapper:not(:first-child)[b-k26x0s28yy]  .hx-autosuggest-input {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.input-group .hx-autosuggest-input-wrapper:not(:last-child)[b-k26x0s28yy]  .hx-autosuggest-input {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.form-control-sm ~ .hx-autosuggest-input-icon[b-k26x0s28yy] {
+    font-size: .75rem;
+}
+
+.hx-autosuggest-input-icon div[role="button"]:not(:hover)[b-k26x0s28yy]  .hx-icon {
+    opacity: var(--hx-autosuggest-input-close-icon-opacity);
+}
+/* _content/Havit.Blazor.Components.Web.Bootstrap/Forms/Autosuggests/Internal/HxAutosuggestItemsInternal.razor.rz.scp.css */
+.dropdown-menu[b-p8clx0pmvn] {
+    width: var(--hx-autosuggest-dropdown-menu-width);
+    overflow: auto;
+    max-height: var(--hx-autosuggest-dropdown-menu-height);
+}
+
+[b-p8clx0pmvn] .hx-autosuggest-item-focused:not(:active):not(:focus) {
+    background-color: var(--hx-autosuggest-item-highlighted-background-color);
+}
+/* _content/Havit.Blazor.Components.Web.Bootstrap/Forms/HxValidationMessage.razor.rz.scp.css */
+[b-sq8mx7uk7p] .feedback-floating {
+    position: absolute;
+    top: 100%;
+}
+/* _content/Havit.Blazor.Components.Web.Bootstrap/Forms/Internal/HxInputDateInternal.razor.rz.scp.css */
+.hx-input-date-icon[b-vy6vrzeamt] {
+	display: flex;
+	align-items: center;
+	margin-right: 1rem;
+	z-index: 1;
+	position: absolute;
+	top: 50%;
+	right: 0;
+	transform: translateY(-50%);
+}
+
+[b-vy6vrzeamt] .hx-input-date:has(input:not(:disabled)) .hx-input-date-icon {
+	cursor: pointer;
+}
+
+[b-vy6vrzeamt] .hx-input-date-dropdown-menu {
+	--bs-dropdown-padding-x: 0.5rem;
+	--bs-dropdown-padding-y: 0.5rem;
+	width: min-content;
+}
+
+.hx-input-date-dropdown-buttons[b-vy6vrzeamt] {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.hx-input-date-dropdown-buttons[b-vy6vrzeamt]  .hx-button:nth-child(2):last-child {
+    margin-left: auto;
+}
+
+.hx-input-date-has-calendar-icon[b-vy6vrzeamt]  .is-invalid {
+	background-position: right calc(0.375em + 2rem) center;
+}
+
+.hx-input-date-has-calendar-icon[b-vy6vrzeamt]  .form-control {
+	padding-right: 4.25rem;
+}
+
+.hx-input-date-has-calendar-icon.input-group-lg[b-vy6vrzeamt]  .form-control {
+	padding-right: 4.75rem;
+}
+
+.hx-input-date-has-calendar-icon.input-group-sm[b-vy6vrzeamt]  .form-control {
+	padding-right: 4rem;
+}
+
+.input-group-sm > .hx-input-date-icon[b-vy6vrzeamt] {
+	font-size: .75rem;
+}
+
+.hx-input-date-wrapper[b-vy6vrzeamt] {
+	width: 100%;
+	display: flex;
+	flex-wrap: nowrap;
+	flex-direction: row;
+}
+
+[b-vy6vrzeamt] .hx-input-date {
+	flex-grow: 1;
+	flex-shrink: 1;
+	min-width: 0;
+}
+
+[b-vy6vrzeamt] .dropdown:focus-within {
+    z-index: 6; /* Assures that the inputs' box shadows are always fully visible (rendered on top). Must be larger than 5 because otherwise the validation message is rendered on top. */
+}
+
+.input-group-start[b-vy6vrzeamt]  .form-control {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+
+.input-group-end[b-vy6vrzeamt]  .form-control {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+}
+/* Invalid left/right input borders need to be over the input group borders in invalid state. */
+.input-group[b-vy6vrzeamt]  .hx-input-date:has(.is-invalid):not(:focus-within) {
+	z-index: 3;
+}
+/* _content/Havit.Blazor.Components.Web.Bootstrap/Forms/Internal/HxInputDateRangeInternal.razor.rz.scp.css */
+[b-cguxy625ss] .feedback-floating {
+    left: 0;
+}
+
+[b-cguxy625ss] .hx-input-date-range-dropdown-menu {
+	--bs-dropdown-padding-x: 0.5rem;
+	--bs-dropdown-padding-y: 0.5rem;
+	width: min-content;
+}
+
+.hx-input-date-range-buttons[b-cguxy625ss] {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.hx-input-date-range-buttons[b-cguxy625ss]  .hx-button:nth-child(2):last-child {
+    margin-left: auto;
+}
+
+[b-cguxy625ss] .dropdown {
+    flex: 1 0 50%;
+}
+
+[b-cguxy625ss] .dropdown:focus-within {
+    z-index: 6; /* Assures that the inputs' box shadows are always fully visible (rendered on top). Must be larger than 5 because otherwise the validation message is rendered on top. */
+}
+
+.hx-input-date-icon[b-cguxy625ss] {
+	display: flex;
+	align-items: center;
+	margin-right: 1rem;
+	z-index: 1;
+	position: absolute;
+	top: 50%;
+	right: 0;
+	transform: translateY(-50%);
+}
+
+.hx-input-date-has-calendar-icon[b-cguxy625ss]  .form-control {
+    padding-right: 2.5rem;
+}
+
+.hx-input-date-has-calendar-icon[b-cguxy625ss]  .is-invalid {
+	background-position: right calc(0.375em + 2rem) center;
+    padding-right: 4.25rem;
+}
+
+.hx-input-date-range:has(input:not(:disabled)) .hx-input-date-icon[b-cguxy625ss] {
+	cursor: pointer;
+}
+/* _content/Havit.Blazor.Components.Web.Bootstrap/Forms/Internal/HxMultiSelectInternal.razor.rz.scp.css */
+.dropdown[b-kjzuko47a2] {
+	flex-grow: 1;
+}
+
+.dropdown-menu[b-kjzuko47a2] {
+    width: 100%;
+    overflow: auto;
+    max-height: var(--hx-multi-select-dropdown-menu-height);
+}
+
+.form-select[readonly]:not([disabled])[b-kjzuko47a2] {
+    background-color: var(--hx-multi-select-background-color);
+}
+
+button.dropdown-item[b-kjzuko47a2],
+.form-control[readonly][b-kjzuko47a2] {
+    cursor: default;
+}
+
+.form-check[b-kjzuko47a2] {
+    margin-bottom: 0;
+}
+
+.form-check-input[b-kjzuko47a2] {
+    margin-left: -1.625em;
+}
+
+.hx-multi-select-input:hover[b-kjzuko47a2] {
+	cursor: default;
+}
+
+.form-check-label[b-kjzuko47a2] {
+	color: inherit;
+}
+
+.hx-multi-select-filter-input-icon[b-kjzuko47a2] {
+	display: flex;
+	align-items: center;
+	margin-right: 1rem;
+	position: absolute;
+	top: 50%;
+	right: 0;
+	transform: translateY(-50%);
+	z-index: 5;
+}
+
+.hx-multi-select-filter-input-wrapper[b-kjzuko47a2] {
+	position: relative;
+	flex: 1 1 auto;
+	width: 100%;
+	min-width: 0;
+	padding: 0.25em;
+}
+
+.form-control-sm ~ .hx-multi-select-filter-input-icon[b-kjzuko47a2] {
+	font-size: .75rem;
+}
+
+.hx-multi-select-filter-input-icon div[role="button"]:not(:hover)[b-kjzuko47a2]  .hx-icon {
+	opacity: var(--hx-multi-select-filter-input-icon-opacity);
+}
+
+.input-group-start[b-kjzuko47a2]  .form-select {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+
+.input-group-end[b-kjzuko47a2]  .form-select {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+}
+/* _content/Havit.Blazor.Components.Web.Bootstrap/Forms/SearchBox/HxSearchBox.razor.rz.scp.css */
+[b-4wqcai4a3p] .dropdown {
+    flex-grow: 1;
+}
+
+[b-4wqcai4a3p] .dropdown-menu {
+    width: 100%; /* override for current .btn-group, see issue #117 */
+}
+
+[b-4wqcai4a3p] .hx-search-box-input-icon {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    z-index: 5;
+}
+
+[b-4wqcai4a3p] .hx-search-box-input-icon-end {
+    right: .75rem;
+}
+
+[b-4wqcai4a3p] .hx-search-box-input-icon-start {
+    left: .75rem;
+}
+
+.form-control[b-4wqcai4a3p] {
+	padding-right: 2.375rem;
+}
+
+.hx-search-box:has(.hx-search-box-input-icon-start) .form-control[b-4wqcai4a3p] {
+    padding-left: 2.375rem;
+}
+
+.dropdown-item:not(:active)[b-4wqcai4a3p]  .hx-search-box-item-title {
+    color: var(--hx-search-box-item-title-color);
+}
+
+.dropdown-item:not(:active)[b-4wqcai4a3p]  .hx-search-box-item-subtitle {
+    color: var(--hx-search-box-item-subtitle-color);
+}
+
+[b-4wqcai4a3p] .hx-dropdown-item-focused {
+    background-color: var(--hx-search-box-item-highlighted-background-color);
+}
+
+[b-4wqcai4a3p] .dropdown-menu {
+    overflow: auto;
+    max-height: var(--hx-search-box-dropdown-menu-height);
+}
+
+.input-group-start[b-4wqcai4a3p]  .form-control {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.input-group-end[b-4wqcai4a3p]  .form-control {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+[b-4wqcai4a3p] .dropdown:focus-within {
+    z-index: 6; /* Assures that the inputs' box shadows are always fully visible (rendered on top). Must be larger than 5 because otherwise the validation message is rendered on top. */
+}
+/* _content/Havit.Blazor.Components.Web.Bootstrap/Forms/SearchBox/Internal/HxSearchBoxItemInternal.razor.rz.scp.css */
+.hx-search-box-item[b-6f2x8m2y3b] {
+    display: flex;
+    align-items: center;
+}
+
+[b-6f2x8m2y3b] .hx-search-box-item-icon {
+    margin: var(--hx-search-box-item-icon-margin);
+    font-size: var(--hx-search-box-item-icon-font-size);
+}
+
+.hx-search-box-item-title[b-6f2x8m2y3b] {
+    font-size: var(--hx-search-box-item-title-font-size);
+	display: block;
+}
+
+.hx-search-box-item-subtitle[b-6f2x8m2y3b] {
+    font-size: var(--hx-search-box-item-subtitle-font-size);
+	display: block;
+}
+/* _content/Havit.Blazor.Components.Web.Bootstrap/Grids/HxGrid.razor.rz.scp.css */
+.hx-grid-sorted[b-693m69k5v1]  .hx-grid-sort-icon {
+    color: var(--hx-grid-sorted-icon-color);
+}
+
+.hx-grid-sortable[b-693m69k5v1]  .hx-grid-sort-icon {
+    visibility: hidden;
+}
+
+[b-693m69k5v1] .hx-grid-infinite-scroll {
+	white-space: nowrap;
+}
+
+th:hover.hx-grid-sortable[b-693m69k5v1]  .hx-grid-sort-icon {
+	visibility: visible;
+}
+
+th > .hx-grid-header-cell-container[b-693m69k5v1] {
+    display: inline-flex;
+    gap: .25rem;
+}
+
+th.hx-grid-sortable.text-end .hx-grid-sort-icon[b-693m69k5v1],
+th.hx-grid-sorted.text-end .hx-grid-sort-icon[b-693m69k5v1] {
+    order: 0;
+}
+
+th.hx-grid-sortable.text-end .hx-grid-header-cell-template[b-693m69k5v1],
+th.hx-grid-sorted.text-end .hx-grid-header-cell-template[b-693m69k5v1] {
+    order: 1;
+}
+
+.hx-grid-header-cell-container[b-693m69k5v1]  .hx-icon {
+    align-self: center;
+}
+
+[b-693m69k5v1] .hx-grid-btn {
+    border-radius: var(--hx-grid-button-border-radius);
+    padding: 0 .25rem;
+    background: transparent;
+    border: none;
+}
+
+[b-693m69k5v1] .hx-grid-btn:hover {
+    background: var(--hx-grid-button-hover-background);
+}
+
+[b-693m69k5v1] .hx-grid-btn:active {
+    color: currentColor;
+}
+
+[b-693m69k5v1] .hx-context-menu-grid-column {
+	vertical-align: middle;
+}
+/* _content/Havit.Blazor.Components.Web.Bootstrap/Layouts/HxListLayout.razor.rz.scp.css */
+[b-c4syx7uv8l] .hx-grid-container {
+    border-top: 1px solid var(--bs-border-color);
+}
+
+[b-c4syx7uv8l] .hx-grid:has(.sticky-top) {
+	border-collapse: separate;
+	border-spacing: 0;
+}
+
+.hx-list-layout:has(.sticky-top)[b-c4syx7uv8l]  .dropdown-menu {
+	--bs-dropdown-zindex: 1030;
+}
+
+.hx-list-layout:has(.hx-grid-infinite-scroll)[b-c4syx7uv8l]  .card {
+	overflow: hidden;
+}
+
+.hx-list-layout-header[b-c4syx7uv8l]  button {
+    white-space: nowrap;
+}
+
+.hx-list-layout-dropdown-menu-link[b-c4syx7uv8l] {
+    display: flex;
+    align-items: center;
+}
+
+[b-c4syx7uv8l] .hx-grid {
+    --hx-context-menu-button-border-radius: .25rem;
+    margin-bottom: 0;
+    font-size: var(--hx-list-layout-table-font-size);
+}
+
+[b-c4syx7uv8l] .hx-grid td:first-child,
+[b-c4syx7uv8l] .hx-grid th:first-child {
+    padding-left: 1rem;
+}
+
+[b-c4syx7uv8l] .hx-grid td:last-child,
+[b-c4syx7uv8l] .hx-grid th:last-child {
+    padding-right: 1rem;
+}
+
+.hx-list-layout:not(:has(.hx-pager))[b-c4syx7uv8l]  .hx-grid tr:last-of-type td:first-child {
+	border-bottom-left-radius: var(--bs-card-inner-border-radius);
+}
+
+.hx-list-layout:not(:has(.hx-pager))[b-c4syx7uv8l]  .hx-grid tr:last-of-type td:last-child {
+	border-bottom-right-radius: var(--bs-card-inner-border-radius);
+}
+
+.hx-list-layout:not(:has(.hx-pager))[b-c4syx7uv8l]  .hx-grid tr:last-of-type td {
+    border-bottom-width: 0;
+}
+
+[b-c4syx7uv8l] .hx-pager {
+	margin: 1rem;
+}
+
+.hx-list-layout-dropdown-menu-link:hover[b-c4syx7uv8l] {
+	text-decoration: underline;
+}
+
+.hx-list-layout-named-view[b-c4syx7uv8l] {
+	margin-right: auto;
+}
+
+.hx-list-layout-named-view .card-title[b-c4syx7uv8l] {
+    display: flex;
+    align-items: center;
+}
+
+.hx-list-layout-named-view[b-c4syx7uv8l]  .hx-icon {
+    font-size: .75rem;
+}
+
+.hx-list-layout-header .card-title[b-c4syx7uv8l] {
+    margin-bottom: 0;
+}
+/* _content/Havit.Blazor.Components.Web.Bootstrap/ListGroups/HxListGroupItem.razor.rz.scp.css */
+.list-group-numbered .list-group-item[b-nx9a72nvdj] {
+    counter-increment: list-group-counter;
+}
+
+.list-group-numbered .list-group-item[b-nx9a72nvdj]::before {
+    content: counter(list-group-counter) ". ";
+}
+
+.list-group-item-action[b-nx9a72nvdj] {
+    cursor: pointer;
+}
+/* _content/Havit.Blazor.Components.Web.Bootstrap/Navigation/HxScrollspy.razor.rz.scp.css */
+.hx-scrollspy[b-gcib8zqxrm]
+{
+	position: relative;
+	overflow: auto;
+	height: 100%;
+}
+
+.hx-scrollspy:focus[b-gcib8zqxrm] {
+	outline: none;
+}
+
+/* Last direct div in Scrollspy container needs to have minimal height of 100% of its parent */
+.hx-scrollspy[b-gcib8zqxrm]  > div:last-child {
+	min-height: 100%;
+}
+/* _content/Havit.Blazor.Components.Web.Bootstrap/Navigation/HxSidebar.razor.rz.scp.css */
+.hx-sidebar[b-yk0ay6wa9j] {
+	display: flex;
+	flex-direction: column;
+	flex-shrink: 0;
+	flex-basis: var(--hx-sidebar-width);
+	flex-grow: 1;
+	background-color: var(--hx-sidebar-background-color);
+}
+
+.hx-sidebar-collapse[b-yk0ay6wa9j] {
+	flex-direction: column;
+	flex-grow: 1;
+}
+
+@media (min-width: 768px) {
+	.hx-sidebar[b-yk0ay6wa9j],
+	.hx-sidebar .nav-menu[b-yk0ay6wa9j] {
+		max-height: 100vh;
+	}
+}
+
+.hx-sidebar.collapsed[b-yk0ay6wa9j] {
+	flex-basis: var(--hx-sidebar-collapsed-width);
+	min-width: auto;
+}
+
+.hx-sidebar-header[b-yk0ay6wa9j] {
+	padding: var(--hx-sidebar-header-padding);
+}
+
+.hx-sidebar-body[b-yk0ay6wa9j] {
+	padding: var(--hx-sidebar-body-padding);
+}
+
+.hx-sidebar-footer[b-yk0ay6wa9j] {
+	display: flex;
+	width: 100%;
+	flex-grow: 0;
+	padding: var(--hx-sidebar-footer-padding);
+}
+
+[b-yk0ay6wa9j] .hx-sidebar-navbar-toggler {
+	font-size: 1.875rem;
+	padding: 0;
+	border: none !important;
+	width: 2.5rem !important;
+	height: 2.5rem !important;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-left: auto;
+}
+
+[b-yk0ay6wa9j] .hx-sidebar-navbar-toggler:focus-within {
+	box-shadow: 0 0 0 0.25rem rgb(13 110 253 / 25%);
+}
+
+.hx-sidebar-toggler[b-yk0ay6wa9j] {
+	position: absolute;
+	top: 50%;
+	left: 100%;
+	transform: translate(-50%, -50%);
+	display: none; /* Hide the sidebar toggler in navbar mode (when below the responsive breakpoint). */
+}
+
+.hx-sidebar-toggler-inner[b-yk0ay6wa9j] {
+	padding: .625rem;
+}
+
+.hx-sidebar-toggler-arrow[b-yk0ay6wa9j] {
+	width: .25rem;
+	height: .75rem;
+	border-radius: .25rem;
+	background-color: var(--hx-sidebar-toggler-background);
+	transition: all .25s ease-in-out;
+	transform: translateY(.15rem) rotate(0deg) translateZ(0px);
+}
+
+.hx-sidebar-toggler:hover .hx-sidebar-toggler-arrow[b-yk0ay6wa9j] {
+	background-color: var(--bs-body-color);
+}
+
+.hx-sidebar-toggler-arrow + .hx-sidebar-toggler-arrow[b-yk0ay6wa9j] {
+	transform: translateY(-.15rem) rotate(0deg) translateZ(0px);
+}
+
+.hx-sidebar-toggler:hover .hx-sidebar-toggler-arrow[b-yk0ay6wa9j] {
+	transform: translateY(.15rem) rotate(15deg) translateZ(0px);
+}
+
+.hx-sidebar-toggler:hover .hx-sidebar-toggler-arrow + .hx-sidebar-toggler-arrow[b-yk0ay6wa9j] {
+	transform: translateY(-.15rem) rotate(-15deg) translateZ(0px);
+}
+
+.collapsed .hx-sidebar-toggler:hover .hx-sidebar-toggler-arrow[b-yk0ay6wa9j] {
+	transform: translateY(.15rem) rotate(-15deg) translateZ(0px);
+}
+
+.collapsed .hx-sidebar-toggler:hover .hx-sidebar-toggler-arrow + .hx-sidebar-toggler-arrow[b-yk0ay6wa9j] {
+	transform: translateY(-.15rem) rotate(15deg) translateZ(0px);
+}
+
+.hx-sidebar-navbar-toggler:hover[b-yk0ay6wa9j] {
+	color: var(--bs-primary);
+}
+
+[b-yk0ay6wa9j] a[aria-expanded="true"] .bi-chevron-right {
+	transform: rotate(90deg);
+}
+
+/*Desktop collapsed*/
+.hx-sidebar.collapsed[b-yk0ay6wa9j] {
+	width: var(--hx-sidebar-collapsed-width);
+}
+
+.hx-sidebar.collapsed[b-yk0ay6wa9j]  .hx-sidebar-brand-name,
+.hx-sidebar.collapsed[b-yk0ay6wa9j]  .hx-sidebar-item-navlink-content-inner,
+.hx-sidebar.collapsed[b-yk0ay6wa9j]  .expand-icon {
+	display: none;
+}
+/* _content/Havit.Blazor.Components.Web.Bootstrap/Navigation/HxSidebarBrand.razor.rz.scp.css */
+.hx-sidebar-brand[b-wr8sskoq1t] {
+	display: flex;
+	align-items: center;
+	text-decoration: none;
+	font-size: .875rem;
+	flex-grow: 1;
+}
+
+.hx-sidebar-brand-logo[b-wr8sskoq1t] {
+	width: var(--hx-sidebar-brand-logo-width);
+	height: var(--hx-sidebar-brand-logo-height);
+}
+
+.hx-sidebar-brand-shortname[b-wr8sskoq1t] {
+	background-color: var(--hx-sidebar-brand-shortname-background-color);
+	border-radius: var(--hx-sidebar-brand-shortname-border-radius);
+	width: var(--hx-sidebar-brand-shortname-width);
+	height: var(--hx-sidebar-brand-shortname-height);
+	font-weight: var(--hx-sidebar-brand-shortname-font-weight);
+	color: var(--hx-sidebar-brand-shortname-color);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.hx-sidebar-brand-name[b-wr8sskoq1t] {
+	font-size: 1.25rem;
+	margin-left: .5rem;
+	color: var(--hx-sidebar-brand-name-color);
+	font-weight: var(--hx-sidebar-brand-name-font-weight);
+}
+/* _content/Havit.Blazor.Components.Web.Bootstrap/Navigation/HxSidebarFooter.razor.rz.scp.css */
+[b-zc68rx40t3] .nav-link {
+	line-height: 1;
+	padding: var(--hx-sidebar-footer-item-padding);
+	margin: var(--hx-sidebar-footer-item-margin);
+	font-size: var(--hx-sidebar-footer-item-font-size);
+	color: var(--hx-sidebar-footer-item-color);
+	border-radius: var(--hx-sidebar-footer-item-radius);
+}
+
+[b-zc68rx40t3] .nav-link:hover {
+	background-color: rgba(var(--hx-sidebar-footer-item-hover-background-color), var(--hx-sidebar-footer-item-hover-background-opacity));
+	color: var(--hx-sidebar-footer-item-hover-color);
+}
+
+[b-zc68rx40t3] .hx-sidebar-footer-navlink {
+	display: flex;
+	align-items: center;
+}
+/* _content/Havit.Blazor.Components.Web.Bootstrap/Navigation/HxSidebarItem.razor.rz.scp.css */
+[b-7yp9wz11kh] .hx-sidebar-item {
+	display: block; /*Overrides the inline flex from btn-group placed by HxDropdown*/
+}
+
+[b-7yp9wz11kh] .nav-link {
+	line-height: 1;
+	padding: var(--hx-sidebar-item-padding);
+	margin: var(--hx-sidebar-item-margin);
+	font-size: var(--hx-sidebar-item-font-size);
+	color: var(--hx-sidebar-item-color);
+	border-radius: var(--hx-sidebar-item-border-radius);
+}
+
+[b-7yp9wz11kh] .hx-sidebar-item-navlink-content {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	align-self: stretch;
+	gap: .75rem;
+}
+
+[b-7yp9wz11kh] .hx-sidebar-subitems.collapse .nav-link,
+[b-7yp9wz11kh] .hx-sidebar-subitems.collapsing .nav-link {
+	margin: var(--hx-sidebar-subitem-margin);
+	padding: var(--hx-sidebar-subitem-padding);
+	font-size: var(--hx-sidebar-subitem-font-size);
+	display: flex;
+}
+
+[b-7yp9wz11kh] .hx-sidebar-subitems.show .hx-sidebar-item-navlink-content-inner {
+	display: inline-flex;
+}
+
+[b-7yp9wz11kh] .hx-sidebar-item-navlink-content-inner {
+	display: flex;
+	align-items: center;
+	margin-right: auto;
+}
+
+[b-7yp9wz11kh] .hx-sidebar-collapsed-nav {
+	flex-direction: column;
+}
+
+[b-7yp9wz11kh] a.nav-link:hover,
+.hx-sidebar-item-highlight-on-active-child:has(.hx-sidebar-subitems .nav-link.active)[b-7yp9wz11kh]  > a.nav-link:hover {
+	background-color: rgba(var(--hx-sidebar-item-hover-background-color), var(--hx-sidebar-item-hover-background-opacity));
+	color: var(--hx-sidebar-item-hover-color);
+}
+
+[b-7yp9wz11kh] a.nav-link.active {
+	background-color: rgba(var(--hx-sidebar-item-active-background-color), var(--hx-sidebar-item-active-background-opacity));
+	color: var(--hx-sidebar-item-active-color);
+	font-weight: var(--hx-sidebar-item-active-font-weight);
+}
+
+.hx-sidebar-item-highlight-on-active-child:has(.hx-sidebar-subitems .nav-link.active)[b-7yp9wz11kh]  > a.nav-link {
+	background-color: rgba(var(--hx-sidebar-parent-item-active-background-color), var(--hx-sidebar-parent-item-active-background-opacity));
+	color: var(--hx-sidebar-parent-item-active-color);
+	font-weight: var(--hx-sidebar-parent-item-active-font-weight);
+}
+
+[b-7yp9wz11kh] i {
+	color: var(--hx-sidebar-item-icon-color);
+	transition: transform .35s ease;
+	transform-origin: .5em 50%;
+}
+
+[b-7yp9wz11kh] a.nav-link:hover .hx-sidebar-item-icon {
+	color: var(--hx-sidebar-item-hover-icon-color);
+}
+
+[b-7yp9wz11kh] a.nav-link.active .hx-sidebar-item-icon {
+	color: var(--hx-sidebar-item-active-icon-color);
+}
+
+.hx-sidebar-item-highlight-on-active-child:has(.hx-sidebar-subitems .nav-link.active)[b-7yp9wz11kh] > .hx-sidebar-item .hx-sidebar-item-icon {
+	color: var(--hx-sidebar-parent-item-active-icon-color);
+}
+
+[b-7yp9wz11kh] .bi-chevron-right {
+	font-size: .75rem;
+	margin-left: .5rem;
+}
+
+[b-7yp9wz11kh] .dropdown-menu {
+	max-height: 100vh;
+	overflow: auto;
+}
+/* _content/Havit.Blazor.Components.Web.Bootstrap/Offcanvas/HxOffcanvas.razor.rz.scp.css */
+.hx-offcanvas-footer[b-d2qb2c6y39] {
+  display: flex;
+  align-items: center;
+  padding: var(--hx-offcanvas-footer-padding-y)
+    var(--hx-offcanvas-footer-padding-x);
+}
+
+.offcanvas-start.hx-offcanvas-sm[b-d2qb2c6y39],
+.offcanvas-end.hx-offcanvas-sm[b-d2qb2c6y39] {
+  width: var(--hx-offcanvas-horizontal-width-sm);
+}
+.offcanvas-start.hx-offcanvas-lg[b-d2qb2c6y39],
+.offcanvas-end.hx-offcanvas-lg[b-d2qb2c6y39] {
+  width: var(--hx-offcanvas-horizontal-width-lg);
+}
+
+.hx-offcanvas-close-button[b-d2qb2c6y39] {
+    --bs-text-opacity: 1;
+    color: inherit;
+}
+/* _content/Havit.Blazor.Components.Web.Bootstrap/Progress/HxProgressIndicator.razor.rz.scp.css */
+.hx-progress-overlay[b-ha9vhtqwa8] {
+    position: relative;
+}
+
+.hx-progress-indicator[b-ha9vhtqwa8] {
+    z-index: 1090;
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--hx-progress-indicator-background);
+    border: 1px solid var(--hx-progress-indicator-border-color);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: var(--hx-progress-indicator-box-shadow);
+}
+
+.hx-progress-indicator-spinner[b-ha9vhtqwa8] {
+    color: var(--hx-progress-indicator-spinner-color);
+}
+/* _content/Havit.Blazor.Components.Web.Bootstrap/Tags/Internal/HxInputTagsInputInternal.razor.rz.scp.css */
+input:focus[b-6vyashw6w0] {
+    outline: none;
+}
+
+input[b-6vyashw6w0] {
+    background-color: inherit;
+    color: var(--bs-body-color);
+    width: 100%;
+    padding: 0;
+}
+
+[b-6vyashw6w0]::placeholder {
+    color: var(--hx-input-tags-input-placeholder-color);
+}
+/* _content/Havit.Blazor.Components.Web.Bootstrap/Tags/Internal/HxInputTagsInternal.razor.rz.scp.css */
+.hx-input-tags-control[b-gb1jfrh5wb] {
+	position: relative;
+	display: flex;
+	flex-grow: 1;
+	flex-wrap: wrap;
+	align-items: center;
+}
+
+input:focus[b-gb1jfrh5wb] {
+	outline: none;
+}
+
+.dropdown[b-gb1jfrh5wb] {
+	display: flex;
+	flex-grow: 1;
+	flex-basis: var(--hx-input-tags-input-width)
+}
+
+[b-gb1jfrh5wb] .hx-tag {
+	margin: var(--hx-input-tags-tag-margin);
+	display: flex;
+	align-items: center;
+}
+
+[b-gb1jfrh5wb] .hx-icon {
+	display: flex;
+}
+
+.hx-input-tags-naked-sm[b-gb1jfrh5wb]  {
+	font-size: var(--hx-input-tags-naked-font-size-sm);
+}
+
+.hx-input-tags-naked-lg[b-gb1jfrh5wb]  {
+	font-size: var(--hx-input-tags-naked-font-size-lg);
+}
+
+.hx-tag-remove-button[b-gb1jfrh5wb] {
+	display: inline-flex;
+	align-items: center;
+	margin: var(--hx-input-tags-remove-button-margin);
+	opacity: .6125;
+}
+
+.hx-tag-remove-button:hover[b-gb1jfrh5wb] {
+	opacity: 1;
+}
+
+.hx-input-tags-control:focus-within:not(.hx-input-tags-naked)[b-gb1jfrh5wb] {
+	box-shadow: var(--hx-input-tags-control-focused-box-shadow);
+	border-color: var(--hx-input-tags-control-focused-border-color);
+	outline: 0;
+}
+
+.hx-input-tags-control-disabled:not(.hx-input-tags-naked)[b-gb1jfrh5wb] {
+	background-color: var(--bs-secondary-bg);
+}
+
+.hx-tag-add-button-text[b-gb1jfrh5wb] {
+	margin: var(--hx-input-tags-add-button-text-margin);
+}
+
+[b-gb1jfrh5wb] .hx-input-tags-dropdown-item-focused {
+	background-color: var(--hx-input-tags-dropdown-item-highlighted-background-color);
+}
+
+[b-gb1jfrh5wb] .hx-tag-add-button-disabled {
+	opacity: var(--hx-input-tags-add-button-disabled-opacity);
+	cursor: default;
+}
+/* _content/Havit.Blazor.Components.Web.Bootstrap/Toasts/HxToastContainer.razor.rz.scp.css */
+.hx-toast-container[b-s6wlosgh2n] {
+	z-index: 1080;
+	margin: var(--hx-toast-container-margin);
+}
+/* _content/Havit.Blazor.Components.Web.Bootstrap/TreeViews/HxTreeView.razor.rz.scp.css */
+.hx-tree-view[b-x7mon8gako] {
+  height: 100%;
+  overflow-y: auto;
+}
+/* _content/Havit.Blazor.Components.Web.Bootstrap/TreeViews/Internal/HxTreeViewItemInternal.razor.rz.scp.css */
+.hx-tree-view-item[b-so2pyrqosf] {
+	display: flex;
+	cursor: pointer;
+	align-items: center;
+	gap: var(--hx-tree-view-item-gap);
+	padding: var(--hx-tree-view-item-padding);
+	margin: var(--hx-tree-view-item-margin);
+	font-size: var(--hx-tree-view-item-font-size);
+	border-radius: var(--hx-tree-view-item-border-radius);
+	background-color: var(--hx-tree-view-item-background);
+	color: var(--hx-tree-view-item-color);
+	border-width: var(--hx-tree-view-item-border-width);
+	border-color: var(--hx-tree-view-item-border-color);
+	border-style: var(--hx-tree-view-item-border-style);
+}
+
+.hx-tree-view-item + .hx-tree-view-item[b-so2pyrqosf] {
+	border-top-width: 0;
+}
+
+.hx-tree-view-item.selected[b-so2pyrqosf],
+.hx-tree-view-item.selected:hover[b-so2pyrqosf] {
+	background-color: rgba(var(--hx-tree-view-item-selected-background), var(--hx-tree-view-item-hover-background-opacity));
+	color: var(--hx-tree-view-item-selected-color);
+}
+
+.hx-tree-view-item:hover[b-so2pyrqosf] {
+	background-color: rgba(var(--hx-tree-view-item-hover-background), var(--hx-tree-view-item-hover-background-opacity));
+	color: var(--hx-tree-view-item-hover-color);
+}
+
+.hx-tree-view-item-spacer[b-so2pyrqosf] {
+	flex: 0 0 var(--hx-tree-view-item-spacer-width);
+}
+
+.hx-tree-view-item-title[b-so2pyrqosf] {
+	flex: 1;
+}
+
+.hx-tree-view-item-icon[b-so2pyrqosf] {
+	color: var(--hx-tree-view-item-hover-color);
+}
+
+[b-so2pyrqosf] .hx-tree-view-item-expander {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	transition: transform 0.15s ease-in-out;
+	transform: rotate(0deg);
+
+	&.collapsed {
+		transform: rotate(-90deg);
+	}
+}
+
+.hx-tree-view-item-expander-container[b-so2pyrqosf] {
+	width: var(--hx-tree-view-expander-container-width);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}

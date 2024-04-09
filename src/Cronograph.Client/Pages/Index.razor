@@ -4,76 +4,30 @@
 
 @inject HttpClient Http
 @page "/"
-<style>
-    fluent-badge {
-        --badge-fill-highlight: #ffd800;
-        --badge-fill-lowlight: #333;
-        --badge-color-highlight: #000;
-        --badge-color-lowlight: #fff;
-    }
-</style>
-<FluentToolbar id="toolbar-fluent-components-two" style="width:100%">
-    <FluentTextField slot="start" @oninput="FilterChanged"></FluentTextField>
-    <FluentCombobox slot="end" Appearance="Appearance.Filled" Items=@contexts @bind-Value="@selectedContext" style="margin-right: 5px;"></FluentCombobox>
-    <FluentCombobox slot="end" Appearance="Appearance.Filled" Items=@namespaces @bind-Value="@namespaceName"></FluentCombobox>
- </FluentToolbar>
 
-<FluentDataGrid id="grid" Items=@Rows GridTemplateColumns="85px 160px 8fr 130px 85px" RowsData=DisplayedRows ColumnDefinitions=Columns @ref=grid>
-    <TemplateColumn Title="">
-        @if (context.State == JobStates.Finished)
-        {
-            <FluentBadge Appearance="Appearance.Accent">
-                Finished
-            </FluentBadge>
-        }
-        else if (context.State == JobStates.Running)
-        {
-            <FluentProgressRing></FluentProgressRing>
-        }
-        else if (context.State == JobStates.Waiting)
-        {
-            <FluentBadge Fill="lowlight" Color="lowlight">
-                Waiting
-            </FluentBadge>
-        }
-        else if (context.State == JobStates.Stopped)
-        {
-            <FluentBadge Fill="highlight" Color="highlight">
-                Stopped
-            </FluentBadge>
-        }
-    </TemplateColumn>
-    <TemplateColumn Title="Name">
-        @context.Name
-    </TemplateColumn>
-    <TemplateColumn Title="Message">
-        @context.LastJobRunMessage
-    </TemplateColumn>
-    <TemplateColumn Title="Time">
-        @context.NextJobRunTime.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
-    </TemplateColumn>
-    <TemplateColumn Title="Cron">
-        @if (context.State == JobStates.Stopped)
-        {
-            <FluentButton @onclick="() => Start(context.Name)">Start</FluentButton>
-        }
-        else if (context.State != JobStates.Running)
-        {
-            <FluentButton @onclick="() => Stop(context.Name)">Pause</FluentButton>
-        }
-    </TemplateColumn>
-</FluentDataGrid>
+<HxGrid @ref="grid" TItem="Job" DataProvider="GetGridData" PageSize="5" Responsive="true">
+    <Columns>
+        <HxGridColumn HeaderText="State" ItemTextSelector="x => x.State.ToString()" />
+        <HxGridColumn HeaderText="Name" ItemTextSelector="x => x.Name" />
+        <HxGridColumn HeaderText="Message" ItemTextSelector="x => x.LastJobRunMessage" />
+        <HxGridColumn HeaderText="Time" ItemTextSelector="@(x => x.NextJobRunTime.ToLocalTime().ToString("yyyy-MM-dd HH:mm"))" />
+        <HxGridColumn HeaderText="Cron" ItemTextSelector="x => x.CronString" />
+        <HxContextMenuGridColumn Context="item">
+            <HxContextMenu>
+                <HxContextMenuItem Text="Start" Icon="BootstrapIcon.Trash" OnClick="async () => await Start(item)" />
+                <HxContextMenuItem Text="Pause" Icon="BootstrapIcon.Trash" OnClick="async () => await Pause(item)" />
+                <HxContextMenuItem Text="Stop" Icon="BootstrapIcon.Trash" OnClick="async () => await Stop(item)" />
+            </HxContextMenu>
+        </HxContextMenuGridColumn>
+    </Columns>
+</HxGrid>
 
 @code {
-    private FluentDataGrid<Job> grid;
-    private List<Option<string>> contexts = new();
-    private IQueryable<Job> Rows;
-    private List<Option<string>> namespaces = new();
     private Timer timer;
-    private string namespaceName = "flux-system";
-    private string selectedContext = "";
+    private string SomeText = "Hej";
     private bool disposed = false;
     private string filter = "";
+    private HxGrid<Job> grid;
 
     void LocationChanged(object sender, LocationChangedEventArgs e)
     {
@@ -89,35 +43,28 @@
     }
     private async Task UpdateView()
     {
-        var newRows = await GetJobs();
-        var changedRows = new List<Job>();
-        foreach (var row in newRows)
-            if (!Rows.Any(x => x == row))
-                changedRows.Add(row);
-
-        if (!changedRows.Any()) return;
-        StateHasChanged();
+        await grid.RefreshDataAsync();
     }
-    protected async Task<List<Job>> GetJobs()
+    private async Task<GridDataProviderResult<Job>> GetGridData(GridDataProviderRequest<Job> request)
     {
-        Console.WriteLine("Hej");
-
         var list = await Http.GetFromJsonAsync<Job[]>("/cronograph/jobs");
-        foreach (var job in list)
-            Console.WriteLine(job);
-        return list.ToList() ?? new();
+        return new GridDataProviderResult<Job>()
+            {
+                Data = list,
+                TotalCount = list.Count()
+            };
     }
-    protected async Task Stop(string name)
+    protected async Task Stop(Job job)
     {
-        await Http.PostAsJsonAsync("/cronograph/jobs/stop", new { Name = name });
+        await Http.PostAsJsonAsync("/cronograph/jobs/stop", new { Name = job.Name });
     }
-    protected async Task Pause(string name)
+    protected async Task Pause(Job job)
     {
-        await Http.PostAsJsonAsync("/cronograph/jobs/pause", new { Name = name });
+        await Http.PostAsJsonAsync("/cronograph/jobs/pause", new { Name = job.Name });
     }
-    protected async Task Start(string name)
+    protected async Task Start(Job job)
     {
-        await Http.PostAsJsonAsync("/cronograph/jobs/start", new { Name = name });
+        await Http.PostAsJsonAsync("/cronograph/jobs/start", new { Name = job.Name });
     }
     public void Dispose() => Dispose(true);
 
@@ -130,7 +77,6 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        Rows = (await GetJobs()).AsQueryable();
     }
 
     protected override void OnInitialized()
