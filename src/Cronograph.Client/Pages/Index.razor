@@ -5,29 +5,38 @@
 @inject HttpClient Http
 @page "/"
 
-<HxGrid @ref="grid" TItem="Job" DataProvider="GetGridData" PageSize="5" Responsive="true">
+<HxGrid @ref="grid" TItem="Job" DataProvider="GetGridData" PageSize="30" Responsive="true" MultiSelectionEnabled="true" @bind-SelectedDataItems="selectedJobs">
     <Columns>
         <HxGridColumn HeaderText="State" ItemTextSelector="x => x.State.ToString()" />
         <HxGridColumn HeaderText="Name" ItemTextSelector="x => x.Name" />
-        <HxGridColumn HeaderText="Message" ItemTextSelector="x => x.LastJobRunMessage" />
-        <HxGridColumn HeaderText="Time" ItemTextSelector="@(x => x.NextJobRunTime.ToLocalTime().ToString("yyyy-MM-dd HH:mm"))" />
+        <HxGridColumn HeaderText="Next Run" ItemTextSelector="@(x => x.NextJobRunTime.ToLocalTime().ToString("yyyy-MM-dd HH:mm"))" />
+        <HxGridColumn HeaderText="Last Message" ItemTextSelector="x => x.LastJobRunMessage" />
+        <HxGridColumn HeaderText="Last State" ItemTextSelector="x => x.LastJobRunState.ToString()" />
+        <HxGridColumn HeaderText="Last Run" ItemTextSelector="@(x => x.LastJobRunTime.ToLocalTime().ToString("yyyy-MM-dd HH:mm"))" />
         <HxGridColumn HeaderText="Cron" ItemTextSelector="x => x.CronString" />
-        <HxContextMenuGridColumn Context="item">
+         <HxContextMenuGridColumn Context="item" >
             <HxContextMenu>
-                <HxContextMenuItem Text="Start" Icon="BootstrapIcon.Trash" OnClick="async () => await Start(item)" />
-                <HxContextMenuItem Text="Pause" Icon="BootstrapIcon.Trash" OnClick="async () => await Pause(item)" />
-                <HxContextMenuItem Text="Stop" Icon="BootstrapIcon.Trash" OnClick="async () => await Stop(item)" />
+                <HxContextMenuItem Text="Execute" Icon="BootstrapIcon.PlayCircleFill" OnClick="async () => await Execute(item)" />
+                <HxDropdownDivider />
+                <HxContextMenuItem Text="Start" Icon="BootstrapIcon.PlayFill" OnClick="async () => await Start(item)" />
+                <HxContextMenuItem Text="Stop" Icon="BootstrapIcon.StopFill" OnClick="async () => await Stop(item)" />
             </HxContextMenu>
         </HxContextMenuGridColumn>
     </Columns>
 </HxGrid>
-
+<HxContextMenu>
+    <HxContextMenuItem Text="Execute" Icon="BootstrapIcon.PlayCircleFill" OnClick="async () => await Execute(selectedJobs)" />
+    <HxDropdownDivider />
+    <HxContextMenuItem Text="Start" Icon="BootstrapIcon.PlayFill" OnClick="async () => await Start(selectedJobs)" />
+    <HxContextMenuItem Text="Stop" Icon="BootstrapIcon.StopFill" OnClick="async () => await Stop(selectedJobs)" />
+</HxContextMenu>
 @code {
     private Timer timer;
     private string SomeText = "Hej";
     private bool disposed = false;
     private string filter = "";
     private HxGrid<Job> grid;
+    private HashSet<Job> selectedJobs = new();
 
     void LocationChanged(object sender, LocationChangedEventArgs e)
     {
@@ -56,15 +65,27 @@
     }
     protected async Task Stop(Job job)
     {
-        await Http.PostAsJsonAsync("/cronograph/jobs/stop", new { Name = job.Name });
+        await Http.PostAsJsonAsync("/cronograph/jobs/stop", new JobName { Name = job.Name });
     }
-    protected async Task Pause(Job job)
+    protected async Task Stop(HashSet<Job> jobs)
     {
-        await Http.PostAsJsonAsync("/cronograph/jobs/pause", new { Name = job.Name });
+        //await Http.PostAsJsonAsync("/cronograph/jobs/stop", new JobName { Name = job.Name });
     }
     protected async Task Start(Job job)
     {
-        await Http.PostAsJsonAsync("/cronograph/jobs/start", new { Name = job.Name });
+        await Http.PostAsJsonAsync("/cronograph/jobs/start", new JobName { Name = job.Name });
+    }
+    protected async Task Start(HashSet<Job> jobs)
+    {
+        //await Http.PostAsJsonAsync("/cronograph/jobs/start", new JobName { Name = job.Name });
+    }
+    protected async Task Execute(Job job)
+    {
+        await Http.PostAsJsonAsync("/cronograph/jobs/execute", new JobName { Name = job.Name });
+    }
+    protected async Task Execute(HashSet<Job> jobs)
+    {
+        //await Http.PostAsJsonAsync("/cronograph/jobs/execute", new JobName { Name = job.Name });
     }
     public void Dispose() => Dispose(true);
 

@@ -6,12 +6,6 @@ using Cronograph.Shared;
 
 namespace Cronograph;
 
-public interface ICronograph
-{
-    void AddJob(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default);
-    void AddOneShot(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default);
-    void AddScheduledService<T>(string name, string cron, TimeZoneInfo? timeZone = default) where T : IScheduledService;
-}
 public class CronographMemoryCache
 {
     private readonly Dictionary<string, JobFunction> jobFunctions = new();
@@ -124,17 +118,7 @@ public class Cronograph : BackgroundService, ICronograph
                     return;
                 foreach (var job in jobs.Where(x => x.State != JobStates.Running && x.State != JobStates.Stopped))
                 {
-                    var runningJob = job with { State = JobStates.Running };
-                    store.UpsertJob(runningJob);
-#pragma warning disable CS4014
-                    Task.Run(
-                        async () =>
-                        {
-                            await RunAction(job, stoppingToken);
-                        },
-                        stoppingToken);
-#pragma warning restore CS4014
-                    logger.LogInformation("Started job [{job}]", job.Name);
+                    ExecuteJob(job, stoppingToken);
                 }
                 
                 var allJobs = store.GetJobs();
@@ -147,27 +131,41 @@ public class Cronograph : BackgroundService, ICronograph
         }
     }
 
+    public void ExecuteJob(Job job, CancellationToken stoppingToken)
+    {
+        var runningJob = job with { State = JobStates.Running };
+        store.UpsertJob(runningJob);
+#pragma warning disable CS4014
+        Task.Run(
+            async () =>
+            {
+                await RunAction(job, stoppingToken);
+            },
+            stoppingToken);
+#pragma warning restore CS4014
+        logger.LogInformation("Started job [{job}]", job.Name);
+    }
+
     private async Task RunAction(Job job, CancellationToken stoppingToken)
     {
         var start = dateTime.UtcNow;
         var run = new JobRun(GetId(), job.Name, JobRunStates.Running, start);
         store.UpsertJobRun(run);
 
-
         var jobFunction = cache.GetJobFunction(job.Name);
 
         try
         {
             await jobFunction.Action(stoppingToken);
-
+            var end = dateTime.UtcNow;
             if (job.OneShot == true)
                 job = job with { State = JobStates.Stopped };
             else
                 job = job with { State = JobStates.Finished };
-            job = job with { LastJobRunState = JobRunStates.Success, LastJobRunMessage = "" };
+            job = job with { LastJobRunState = JobRunStates.Success, LastJobRunMessage = "", LastJobRunTime = end };
             store.UpsertJob(job);
 
-            run = run with { State = JobRunStates.Success, End = dateTime.UtcNow };
+            run = run with { State = JobRunStates.Success, End = end };
             store.UpsertJobRun(run);
         }
         catch (Exception exception)
@@ -175,10 +173,16 @@ public class Cronograph : BackgroundService, ICronograph
             var errorMessage = $"Error caught in job [{job.Name}] - {exception.Message}";
             logger.LogError(exception, errorMessage);
 
-            run = run with { State = JobRunStates.Failed, End = dateTime.UtcNow, ErrorMessage = errorMessage, ExceptionDetails = exception.ToString() };
+            var end = dateTime.UtcNow;
+            run = run with { State = JobRunStates.Failed, End = end, ErrorMessage = errorMessage, ExceptionDetails = exception.ToString() };
             store.UpsertJobRun(run);
 
-            job = job with { LastJobRunState = JobRunStates.Failed, LastJobRunMessage = errorMessage };
+            if (job.OneShot == true)
+                job = job with { State = JobStates.Stopped };
+            else
+                job = job with { State = JobStates.Finished };
+
+            job = job with { LastJobRunState = JobRunStates.Failed, LastJobRunMessage = errorMessage, LastJobRunTime = end };
             store.UpsertJob(job);
         }
     }
@@ -202,5 +206,17 @@ public class Cronograph : BackgroundService, ICronograph
                 nextJobs.Add(job);
         }
         return (nextJobs, (int)((nextOccurence - currentTime).Value.TotalMilliseconds));
+    }
+
+    public void StartJob(Job job, CancellationToken stoppingToken)
+    {
+        job = job with { State = JobStates.Waiting };
+        store.UpsertJob(job);
+    }
+
+    public void StopJob(Job job, CancellationToken stoppingToken)
+    {
+        job = job with { State = JobStates.Stopped };
+        store.UpsertJob(job);
     }
 }

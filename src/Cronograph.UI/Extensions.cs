@@ -14,6 +14,30 @@ public static class Extensions
         MapFiles(physicalDir, subPath, manifestEmbeddedProvider, applicationBuilder);
 
         endpointBuilder.MapGet(subPath + "/jobs", (ICronographStore store) => store.GetJobs());
+        endpointBuilder.MapPost(subPath + "/jobs/execute", async (HttpRequest request, ICronograph cronograph, ICronographStore store) =>
+        {
+            var jobName = await request.ReadFromJsonAsync<JobName>();
+            if (jobName == null || jobName.Name == null)
+                return;
+            var job = store.GetJob(jobName.Name);
+            cronograph.ExecuteJob(job, default);
+        });
+        endpointBuilder.MapPost(subPath + "/jobs/start", async (HttpRequest request, ICronograph cronograph, ICronographStore store) =>
+        {
+            var jobName = await request.ReadFromJsonAsync<JobName>();
+            if (jobName == null || jobName.Name == null)
+                return;
+            var job = store.GetJob(jobName.Name);
+            cronograph.StartJob(job, default);
+        });
+        endpointBuilder.MapPost(subPath + "/jobs/stop", async (HttpRequest request, ICronograph cronograph, ICronographStore store) =>
+        {
+            var jobName = await request.ReadFromJsonAsync<JobName>();
+            if (jobName == null || jobName.Name == null)
+                return;
+            var job = store.GetJob(jobName.Name);
+            cronograph.StopJob(job, default);
+        });
         endpointBuilder.Map(subPath + "/{**:nonfile}", async cnt =>
         {
             var index = manifestEmbeddedProvider.GetDirectoryContents(physicalDir).Single(x => x.Name.Contains("index.html"));

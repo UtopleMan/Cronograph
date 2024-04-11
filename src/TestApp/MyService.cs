@@ -1,10 +1,10 @@
-﻿using Cronograph;
+﻿using Cronograph.Shared;
 
 public class MyService : IScheduledService
 {
-    public Task ExecuteAsync(CancellationToken stoppingToken)
+    public async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         Console.WriteLine("Scheduled service boom!");
-        return Task.CompletedTask;
+        await Task.Delay(3000);
     }
 }

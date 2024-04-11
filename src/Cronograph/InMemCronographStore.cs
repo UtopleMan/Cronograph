@@ -27,4 +27,9 @@ internal class InMemCronographStore : ICronographStore
     {
         return jobRuns.Values.Where(x => x.JobName == job.Name).ToList();
     }
+
+    public Job GetJob(string jobName)
+    {
+        return jobs.Values.Single(x => x.Name == jobName);
+    }
 }
