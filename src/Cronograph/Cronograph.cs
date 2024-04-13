@@ -159,9 +159,10 @@ public class Cronograph : BackgroundService, ICronograph
             await jobFunction.Action(stoppingToken);
             var end = dateTime.UtcNow;
             if (job.OneShot == true)
-                job = job with { State = JobStates.Stopped };
+                job = job with { State = JobStates.Stopped, NextJobRunTime = DateTimeOffset.MinValue };
             else
-                job = job with { State = JobStates.Finished };
+                job = job with { State = JobStates.Finished, NextJobRunTime = CreateCronExpression(job.CronString).GetNextOccurrence(dateTime.UtcNow, TimeZoneInfo.Utc) ?? DateTimeOffset.MinValue };
+
             job = job with { LastJobRunState = JobRunStates.Success, LastJobRunMessage = "", LastJobRunTime = end };
             store.UpsertJob(job);
 
@@ -178,9 +179,9 @@ public class Cronograph : BackgroundService, ICronograph
             store.UpsertJobRun(run);
 
             if (job.OneShot == true)
-                job = job with { State = JobStates.Stopped };
+                job = job with { State = JobStates.Stopped, NextJobRunTime = DateTimeOffset.MinValue };
             else
-                job = job with { State = JobStates.Finished };
+                job = job with { State = JobStates.Finished, NextJobRunTime = CreateCronExpression(job.CronString).GetNextOccurrence(dateTime.UtcNow, TimeZoneInfo.Utc) ?? DateTimeOffset.MinValue };
 
             job = job with { LastJobRunState = JobRunStates.Failed, LastJobRunMessage = errorMessage, LastJobRunTime = end };
             store.UpsertJob(job);

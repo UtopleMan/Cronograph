@@ -1,8 +1,25 @@
-﻿@inherits LayoutComponentBase
-<div class="page">
-	<main>
-		<article class="content px-4">
-			@Body
-		</article>
-	</main>
+﻿@using Cronograph.Client.Pages
+@inherits LayoutComponentBase
+
+<HxMessenger Position="ToastContainerPosition.TopEnd" />
+<HxMessageBoxHost />
+
+<div class="d-md-flex min-vh-100">
+    <ErrorBoundary @ref="_errorBoundaryComponent">
+        <ErrorContent Context="exception">
+            <div class="main p-4 flex-grow-1">
+                <GenericError Exception="exception" OnRecover="() => _errorBoundaryComponent?.Recover()" />
+            </div>
+        </ErrorContent>
+        <ChildContent>
+            <Sidebar />
+            <div class="main p-4 flex-grow-1">
+                @Body
+            </div>
+        </ChildContent>
+    </ErrorBoundary>
 </div>
+
+@code {
+    private ErrorBoundary _errorBoundaryComponent;
+}

@@ -1,0 +1,51 @@
+﻿@{
+    RenderFragment copyToClipboardButton =
+            @<HxButton OnClick="CopyExceptionDetailsToClipboard" CssClass="text-secondary" Icon="BootstrapIcon.Clipboard" />;
+}
+
+<div class="container-lg generic-error">
+	<div class="text-center my-4">
+		<img src="oops.svg" class="mw-100" width="500" alt="Oops">
+	</div>
+
+	<div class="text-center">
+		<h1>Oops...</h1>
+        <p class="lead">Error Occured</p>
+        <HxButton Color="ThemeColor.Primary" OnClick="this.OnRecover" Text="Recover" CssClass="me-2" />
+        <HxButton Color="ThemeColor.Secondary" OnClick="HandleRestartClick" Text="Restart" />
+    </div>
+
+	<HxAccordion CssClass="my-4">
+		<HxAccordionItem>
+			<HeaderTemplate>
+				@Exception.GetType().Name: @Exception.Message
+			</HeaderTemplate>
+			<BodyTemplate>
+				<div class="position-relative pe-4">
+					<div class="position-absolute top-0 end-0">
+                        <HxTooltip WrapperCssClass="@(copiedToClipboard ? "d-none" : null)" @ref="_copyToClipboardTooltip" Text="Copy To Clipboard">
+							@copyToClipboardButton
+                        </HxTooltip>
+
+                        <HxTooltip WrapperCssClass="@(copiedToClipboard ? null : "d-none")" @ref="_copiedToClipboardTooltip" Text="Copied To Clipboard">
+                            @copyToClipboardButton
+                        </HxTooltip>
+                    </div>
+					<code>
+						<pre class="mb-0">
+							@GetFullExceptionText()
+						</pre>
+					</code>
+				</div>
+			</BodyTemplate>
+		</HxAccordionItem>
+	</HxAccordion>
+</div>
+
+<script>
+	function copyToClipboard(text, genericErrorDotnetObjectReference) {
+		navigator.clipboard.writeText(text).then(function () {
+			genericErrorDotnetObjectReference.invokeMethodAsync('GenericError_HandleCopiedToClipboard');
+		});
+	}
+</script>

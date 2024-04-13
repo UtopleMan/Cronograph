@@ -2,34 +2,24 @@
 @using System.Linq
 @using System.Text.Json;
 
-@inject HttpClient Http
 @page "/"
 
 <HxGrid @ref="grid" TItem="Job" DataProvider="GetGridData" PageSize="30" Responsive="true" MultiSelectionEnabled="true" @bind-SelectedDataItems="selectedJobs">
     <Columns>
         <HxGridColumn HeaderText="State" ItemTextSelector="x => x.State.ToString()" />
         <HxGridColumn HeaderText="Name" ItemTextSelector="x => x.Name" />
-        <HxGridColumn HeaderText="Next Run" ItemTextSelector="@(x => x.NextJobRunTime.ToLocalTime().ToString("yyyy-MM-dd HH:mm"))" />
+        <HxGridColumn HeaderText="Next Run" ItemTextSelector="@(x => RenderTime(x.NextJobRunTime))" />
         <HxGridColumn HeaderText="Last Message" ItemTextSelector="x => x.LastJobRunMessage" />
         <HxGridColumn HeaderText="Last State" ItemTextSelector="x => x.LastJobRunState.ToString()" />
-        <HxGridColumn HeaderText="Last Run" ItemTextSelector="@(x => x.LastJobRunTime.ToLocalTime().ToString("yyyy-MM-dd HH:mm"))" />
+        <HxGridColumn HeaderText="Last Run" ItemTextSelector="@(x => RenderTime(x.LastJobRunTime))" />
         <HxGridColumn HeaderText="Cron" ItemTextSelector="x => x.CronString" />
-         <HxContextMenuGridColumn Context="item" >
-            <HxContextMenu>
-                <HxContextMenuItem Text="Execute" Icon="BootstrapIcon.PlayCircleFill" OnClick="async () => await Execute(item)" />
-                <HxDropdownDivider />
-                <HxContextMenuItem Text="Start" Icon="BootstrapIcon.PlayFill" OnClick="async () => await Start(item)" />
-                <HxContextMenuItem Text="Stop" Icon="BootstrapIcon.StopFill" OnClick="async () => await Stop(item)" />
-            </HxContextMenu>
-        </HxContextMenuGridColumn>
     </Columns>
 </HxGrid>
-<HxContextMenu>
-    <HxContextMenuItem Text="Execute" Icon="BootstrapIcon.PlayCircleFill" OnClick="async () => await Execute(selectedJobs)" />
-    <HxDropdownDivider />
-    <HxContextMenuItem Text="Start" Icon="BootstrapIcon.PlayFill" OnClick="async () => await Start(selectedJobs)" />
-    <HxContextMenuItem Text="Stop" Icon="BootstrapIcon.StopFill" OnClick="async () => await Stop(selectedJobs)" />
-</HxContextMenu>
+<p>
+    <HxButton Text="Run now" Enabled="selectedJobs.Any()" OnClick="async () => await Execute(selectedJobs)" Color="ThemeColor.Primary" />
+    <HxButton Text="Schedule" Enabled="selectedJobs.Any()" OnClick="async () => await Start(selectedJobs)" Color="ThemeColor.Secondary" />
+    <HxButton Text="Stop" Enabled="selectedJobs.Any()" OnClick="async () => await Stop(selectedJobs)" Color="ThemeColor.Danger" />
+</p>
 @code {
     private Timer timer;
     private string SomeText = "Hej";
@@ -37,6 +27,42 @@
     private string filter = "";
     private HxGrid<Job> grid;
     private HashSet<Job> selectedJobs = new();
+    [Inject]
+    HttpClient Http { get; set; }
+    [Inject] 
+    IHxMessageBoxService MessageBox { get; set; }
+    [Inject] 
+    IHxMessengerService Messenger { get; set; }
+
+    string RenderTime(DateTimeOffset time)
+    {
+        if (time == DateTimeOffset.MinValue)
+            return "";
+        return time.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss");
+    }
+    private void HandleAddInformationButtonClick()
+    {
+        Messenger.AddInformation(title: "Data encrypted", message: "All your data has been encrypted. To decrypt your data share $100 with all your teammates.");
+    }
+
+    private void HandleAddWarningButtonClick()
+    {
+        Messenger.AddWarning(title: "Bio hazard!", message: "Bio hazard detected in your office!");
+    }
+
+    private void HandleAddErrorButtonClick()
+    {
+        Messenger.AddError(title: "Error", message: "An error occurred during showing messenger message.");
+    }
+    private async Task OpenMessageBox()
+    {
+        var showResult = await MessageBox.ShowAsync("Info", "This is the text", MessageBoxButtons.OkCancel);
+    }
+
+    private async Task OpenConfirm()
+    {
+        var confirmResult = await MessageBox.ConfirmAsync("Confirm", "Do you really want to ...?");
+    }
 
     void LocationChanged(object sender, LocationChangedEventArgs e)
     {
@@ -69,7 +95,8 @@
     }
     protected async Task Stop(HashSet<Job> jobs)
     {
-        //await Http.PostAsJsonAsync("/cronograph/jobs/stop", new JobName { Name = job.Name });
+        foreach (var job in jobs)
+            await Http.PostAsJsonAsync("/cronograph/jobs/stop", new JobName { Name = job.Name });
     }
     protected async Task Start(Job job)
     {
@@ -77,7 +104,8 @@
     }
     protected async Task Start(HashSet<Job> jobs)
     {
-        //await Http.PostAsJsonAsync("/cronograph/jobs/start", new JobName { Name = job.Name });
+        foreach (var job in jobs)
+            await Http.PostAsJsonAsync("/cronograph/jobs/start", new JobName { Name = job.Name });
     }
     protected async Task Execute(Job job)
     {
@@ -85,7 +113,8 @@
     }
     protected async Task Execute(HashSet<Job> jobs)
     {
-        //await Http.PostAsJsonAsync("/cronograph/jobs/execute", new JobName { Name = job.Name });
+        foreach (var job in jobs)
+            await Http.PostAsJsonAsync("/cronograph/jobs/execute", new JobName { Name = job.Name });
     }
     public void Dispose() => Dispose(true);
 
