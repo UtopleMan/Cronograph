@@ -3,38 +3,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Cronograph.Shared;
+using MassTransit;
 
 namespace Cronograph;
-
-public class CronographMemoryCache
-{
-    private readonly Dictionary<string, JobFunction> jobFunctions = new();
-    private readonly Dictionary<string, CronExpression> jobCronExpressions = new();
-    public void UpsertJobFunction(JobFunction jobFunction)
-    {
-        if (jobFunctions.ContainsKey(jobFunction.JobName))
-            jobFunctions[jobFunction.JobName] = jobFunction;
-        else
-            jobFunctions.Add(jobFunction.JobName, jobFunction);
-    }
-    public void UpsertCronExpression(string name, CronExpression cronExpression)
-    {
-        if (jobCronExpressions.ContainsKey(name))
-            jobCronExpressions[name] = cronExpression;
-        else
-            jobCronExpressions.Add(name, cronExpression);
-    }
-
-    internal JobFunction GetJobFunction(string name)
-    {
-        return jobFunctions[name];
-    }
-
-    internal CronExpression GetJobCronExpression(string name)
-    {
-        return jobCronExpressions[name];
-    }
-}
 public class Cronograph : BackgroundService, ICronograph
 {
     private readonly IDateTime dateTime;
@@ -50,54 +21,43 @@ public class Cronograph : BackgroundService, ICronograph
         this.cache = cache;
         this.provider = services.BuildServiceProvider();
     }
-    public void AddJob(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default)
+    public void AddJob(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false)
     {
-        var jobFunction = CreateJobFunction(name, call);
+        var cronExpression = CreateCronExpression(cron);
+        var jobFunction = CreateJobFunction(name, call, cronExpression);
         cache.UpsertJobFunction(jobFunction);
 
-        var cronExpression = CreateCronExpression(cron);
-        cache.UpsertCronExpression(name, cronExpression);
-
-        var job = CreateJob(name, "job()", cron, timeZone);
-        store.UpsertJob(job);
+        var job = CreateJob(name, "job()", cron, timeZone, isSingleton);
+        store.UpsertJob(job with { NextJobRunTime = cronExpression.GetNextOccurrence(dateTime.UtcNow, TimeZoneInfo.Utc) ?? DateTimeOffset.MinValue });
     }
 
-    public void AddOneShot(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default)
+    public void AddOneShot(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false)
     {
-        var jobFunction = CreateJobFunction(name, call);
-        cache.UpsertJobFunction(jobFunction);
-
         var cronExpression = CreateCronExpression(cron);
-        cache.UpsertCronExpression(name, cronExpression);
-
-        var job = CreateJob(name, "oneshot()", cron, timeZone);
-        store.UpsertJob(job with { OneShot = true });
+        var jobFunction = CreateJobFunction(name, call, cronExpression);
+        cache.UpsertJobFunction(jobFunction);
+        var job = CreateJob(name, "oneshot()", cron, timeZone, isSingleton);
+        store.UpsertJob(job with { OneShot = true, NextJobRunTime = cronExpression.GetNextOccurrence(dateTime.UtcNow, TimeZoneInfo.Utc) ?? DateTimeOffset.MinValue });
     }
-    public void AddScheduledService<T>(string name, string cron, TimeZoneInfo? timeZone = default) where T : IScheduledService
+    public void AddScheduledService<T>(string name, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false) where T : IScheduledService
     {
         var service = provider.GetRequiredService<T>();
-        var jobFunction = CreateJobFunction(name, service.ExecuteAsync);
-        cache.UpsertJobFunction(jobFunction);
-
         var cronExpression = CreateCronExpression(cron);
-        cache.UpsertCronExpression(name, cronExpression);
-
-        var job = CreateJob(name, service.GetType().FullName, cron, timeZone);
-        store.UpsertJob(job);
+        var jobFunction = CreateJobFunction(name, service.ExecuteAsync, cronExpression);
+        cache.UpsertJobFunction(jobFunction);
+        var job = CreateJob(name, service.GetType().FullName, cron, timeZone, isSingleton);
+        store.UpsertJob(job with { NextJobRunTime = cronExpression.GetNextOccurrence(dateTime.UtcNow, TimeZoneInfo.Utc) ?? DateTimeOffset.MinValue });
     }
 
-    private Job CreateJob(string name, string className, string cron, TimeZoneInfo? timeZone)
+    private Job CreateJob(string name, string className, string cron, TimeZoneInfo? timeZone, bool isSingleton)
     {
         var usedTimeZone = timeZone;
         if (usedTimeZone == default)
             usedTimeZone = TimeZoneInfo.Utc;
 
-        return new Job(name, className, cron, usedTimeZone.BaseUtcOffset.Minutes);
+        return new Job(name, className, cron, usedTimeZone.BaseUtcOffset.Minutes, isSingleton);
     }
-    private JobFunction CreateJobFunction(string jobName, Func<CancellationToken, Task> call)
-    {
-        return new JobFunction(jobName, call);
-    }
+    private JobFunction CreateJobFunction(string jobName, Func<CancellationToken, Task> call, CronExpression cronExpression) => new JobFunction(jobName, call, cronExpression);
     private CronExpression CreateCronExpression(string cron)
     {
         if (cron.Split(' ').Length > 5)
@@ -111,14 +71,17 @@ public class Cronograph : BackgroundService, ICronograph
         {
             try
             {
-                (var jobs, var msToJob) = GetNextJobSchedule();
-                logger.LogTrace("Next job(s) are [{jobs}]. Starting in {msToJob} ms", jobs.Select(x => x.Name).Aggregate((c, n) => c + ", " + n), msToJob);
+                (var jobNames, var msToJob) = GetNextJobSchedule();
+                if (jobNames.Any())
+                    logger.LogTrace("Next job(s) are [{jobs}]. Starting in {msToJob} ms", jobNames.Aggregate((c, n) => c + ", " + n), msToJob);
                 await Task.Delay(msToJob, stoppingToken);
                 if (stoppingToken.IsCancellationRequested)
                     return;
-                foreach (var job in jobs.Where(x => x.State != JobStates.Running && x.State != JobStates.Stopped))
+                foreach (var jobName in jobNames)
                 {
-                    ExecuteJob(job, stoppingToken);
+                    var foundJob = store.GetJob(jobName);
+                    if (foundJob.State != JobStates.Stopped)
+                        await ExecuteJob(foundJob, stoppingToken);
                 }
                 
                 var allJobs = store.GetJobs();
@@ -131,15 +94,45 @@ public class Cronograph : BackgroundService, ICronograph
         }
     }
 
-    public void ExecuteJob(Job job, CancellationToken stoppingToken)
+    public async Task ExecuteJob(Job job, CancellationToken stoppingToken)
     {
-        var runningJob = job with { State = JobStates.Running };
-        store.UpsertJob(runningJob);
+        ICronographLock jobLock = new AlwaysAllowCronographLock();
+        if (job.IsSingleton)
+            jobLock = store.GetLock();
+
+        if (!(await jobLock.CanRun(job)))
+        {
+            logger.LogTrace("Job {name} not allowed to run", job.Name);
+            return;
+        }
+        logger.LogTrace("Job {name} locked", job.Name);
+
+
+        job = job with { State = JobStates.Running };
+
+        if (job.OneShot)
+            job = job with { NextJobRunTime = DateTimeOffset.MinValue };
+        else
+        {
+            var now = dateTime.UtcNow;
+            var next = CreateCronExpression(job.CronString).GetNextOccurrence(dateTime.UtcNow, TimeZoneInfo.Utc) ?? DateTimeOffset.MinValue;
+            job = job with { NextJobRunTime = next };
+            logger.LogTrace("{now} {next} {diff}", now, next, next - now);
+        }
+        store.UpsertJob(job);
 #pragma warning disable CS4014
         Task.Run(
             async () =>
             {
-                await RunAction(job, stoppingToken);
+                try
+                {
+                    await RunAction(job, stoppingToken);
+                }
+                finally 
+                {
+                    await jobLock.Release(job);
+                    logger.LogTrace("Job {name} released", job.Name);
+                }
             },
             stoppingToken);
 #pragma warning restore CS4014
@@ -153,15 +146,14 @@ public class Cronograph : BackgroundService, ICronograph
         store.UpsertJobRun(run);
 
         var jobFunction = cache.GetJobFunction(job.Name);
-
         try
         {
             await jobFunction.Action(stoppingToken);
             var end = dateTime.UtcNow;
             if (job.OneShot == true)
-                job = job with { State = JobStates.Stopped, NextJobRunTime = DateTimeOffset.MinValue };
+                job = job with { State = JobStates.Stopped };
             else
-                job = job with { State = JobStates.Finished, NextJobRunTime = CreateCronExpression(job.CronString).GetNextOccurrence(dateTime.UtcNow, TimeZoneInfo.Utc) ?? DateTimeOffset.MinValue };
+                job = job with { State = JobStates.Finished };
 
             job = job with { LastJobRunState = JobRunStates.Success, LastJobRunMessage = "", LastJobRunTime = end };
             store.UpsertJob(job);
@@ -179,9 +171,9 @@ public class Cronograph : BackgroundService, ICronograph
             store.UpsertJobRun(run);
 
             if (job.OneShot == true)
-                job = job with { State = JobStates.Stopped, NextJobRunTime = DateTimeOffset.MinValue };
+                job = job with { State = JobStates.Stopped };
             else
-                job = job with { State = JobStates.Finished, NextJobRunTime = CreateCronExpression(job.CronString).GetNextOccurrence(dateTime.UtcNow, TimeZoneInfo.Utc) ?? DateTimeOffset.MinValue };
+                job = job with { State = JobStates.Finished };
 
             job = job with { LastJobRunState = JobRunStates.Failed, LastJobRunMessage = errorMessage, LastJobRunTime = end };
             store.UpsertJob(job);
@@ -189,35 +181,37 @@ public class Cronograph : BackgroundService, ICronograph
     }
     string GetId()
     {
-        return MassTransit.NewId.Next().ToString("N");
+        return NewId.Next().ToString("N");
     }
-    private (IReadOnlyList<Job>, int msToJob) GetNextJobSchedule()
+    private (IReadOnlyList<string>, int msToJob) GetNextJobSchedule()
     {
         var currentTime = dateTime.UtcNow;
         var jobs = store.GetJobs();
-        var nextOccurence = jobs.Min(x => cache.GetJobCronExpression(x.Name).GetNextOccurrence(currentTime, TimeZoneInfo.Utc));
+        var nextOccurence = jobs.Where(x => x.NextJobRunTime != DateTimeOffset.MinValue).OrderBy(x => x.NextJobRunTime).FirstOrDefault();
         if (nextOccurence == null)
-            return (new List<Job>(), 1000);
+            return (new List<string>(), 1000);
 
-        var nextJobs = new List<Job>();
+        var nextJobs = new List<string>();
 
         foreach (var job in jobs)
         {
-            if (cache.GetJobCronExpression(job.Name).GetNextOccurrence(currentTime, TimeZoneInfo.Utc) == nextOccurence)
-                nextJobs.Add(job);
+            if (job.NextJobRunTime == nextOccurence.NextJobRunTime)
+                nextJobs.Add(job.Name);
         }
-        return (nextJobs, (int)((nextOccurence - currentTime).Value.TotalMilliseconds));
+        var nextMs = (int) (nextOccurence.NextJobRunTime - currentTime).TotalMilliseconds;
+        return (nextJobs, nextMs);
     }
 
     public void StartJob(Job job, CancellationToken stoppingToken)
     {
-        job = job with { State = JobStates.Waiting };
+        var function = cache.GetJobFunction(job.Name);
+        job = job with { State = JobStates.Waiting, NextJobRunTime = function.CronExpression.GetNextOccurrence(dateTime.UtcNow, TimeZoneInfo.Utc) ?? DateTimeOffset.MinValue };
         store.UpsertJob(job);
     }
 
     public void StopJob(Job job, CancellationToken stoppingToken)
     {
-        job = job with { State = JobStates.Stopped };
+        job = job with { State = JobStates.Stopped, NextJobRunTime = DateTimeOffset.MinValue };
         store.UpsertJob(job);
     }
 }

@@ -1,7 +1,4 @@
-﻿using System;
-
-namespace Cronograph;
-
+﻿namespace Cronograph;
 public interface IDateTime
 {
     DateTimeOffset UtcNow { get; }

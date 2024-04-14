@@ -1,16 +1,15 @@
-﻿using System.Diagnostics.Contracts;
-
-namespace Cronograph.Shared;
+﻿namespace Cronograph.Shared;
 
 public record Job
 {
     public Job() { }
-    public Job(string Name, string ClassName, string CronString, int TimeZone)
+    public Job(string name, string className, string cronString, int timeZone, bool isSingleton = false)
     {
-        this.Name = Name;
-        this.ClassName = ClassName;
-        this.CronString = CronString;
-        this.TimeZone = TimeZone;
+        Name = name;
+        ClassName = className;
+        CronString = cronString;
+        TimeZone = timeZone;
+        IsSingleton = isSingleton;
         NextJobRunTime = DateTimeOffset.MinValue;
         OneShot = false;
         State = JobStates.Waiting;
@@ -18,26 +17,18 @@ public record Job
         LastJobRunMessage = "";
         LastJobRunTime = DateTimeOffset.MinValue;
     }
-    public string Name {get;set;}
-    public string ClassName {get;set;}
-    public string CronString {get;set;}
-    public int TimeZone {get;set;}
-    public DateTimeOffset NextJobRunTime {get;set;}
-    public bool OneShot {get;set;}
-    public JobStates State {get;set;}
-    public JobRunStates LastJobRunState {get;set;}
-    public string LastJobRunMessage {get;set;}
+    public string Name { get; set; }
+    public string ClassName { get; set; }
+    public string CronString { get; set; }
+    public int TimeZone { get; set; }
+    public bool IsSingleton { get; }
+    public DateTimeOffset NextJobRunTime { get; set; }
+    public bool OneShot { get; set; }
+    public JobStates State { get; set; }
+    public JobRunStates LastJobRunState { get; set; }
+    public string LastJobRunMessage { get; set; }
     public DateTimeOffset LastJobRunTime { get; set; }
 }
-
-//public record Job(string Name, string ClassName, string CronString, TimeZoneInfo TimeZone, DateTimeOffset NextJobRunTime,
-//    bool OneShot, JobStates State, JobRunStates LastJobRunState, string LastJobRunMessage, DateTimeOffset LastJobRunTime)
-//{
-//    public Job(string Name, string ClassName, string CronString, TimeZoneInfo TimeZone) :
-//        this(Name, ClassName, CronString, TimeZone, DateTimeOffset.MinValue, false, JobStates.Waiting, JobRunStates.None, "", DateTimeOffset.MinValue)
-//    { }
-//}
-public record JobFunction(string JobName, Func<CancellationToken, Task> Action);
 public record JobRun(string Id, string JobName, JobRunStates State, DateTimeOffset Start, DateTimeOffset? End, string ErrorMessage, string ExceptionDetails)
 {
     public JobRun(string Id, string JobName, JobRunStates State, DateTimeOffset Start) : this(Id, JobName, State, Start, null, "", "")
@@ -70,13 +61,19 @@ public interface ICronographStore
     Job GetJob(string jobName);
     List<Job> GetJobs();
     List<JobRun> GetJobRuns(Job job);
+    ICronographLock GetLock();
+}
+public interface ICronographLock
+{
+    Task<bool> CanRun(Job job);
+    Task Release(Job job);
 }
 public interface ICronograph
 {
-    void AddJob(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default);
-    void AddOneShot(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default);
-    void AddScheduledService<T>(string name, string cron, TimeZoneInfo? timeZone = default) where T : IScheduledService;
-    void ExecuteJob(Job job, CancellationToken stoppingToken);
+    void AddJob(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false);
+    void AddOneShot(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false);
+    void AddScheduledService<T>(string name, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false) where T : IScheduledService;
+    Task ExecuteJob(Job job, CancellationToken stoppingToken);
     void StartJob(Job job, CancellationToken stoppingToken);
     void StopJob(Job job, CancellationToken stoppingToken);
 }

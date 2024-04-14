@@ -3,16 +3,33 @@
 @using System.Text.Json;
 
 @page "/"
-
 <HxGrid @ref="grid" TItem="Job" DataProvider="GetGridData" PageSize="30" Responsive="true" MultiSelectionEnabled="true" @bind-SelectedDataItems="selectedJobs">
     <Columns>
-        <HxGridColumn HeaderText="State" ItemTextSelector="x => x.State.ToString()" />
+        <HxGridColumn>
+            <ItemTemplate Context="job">
+                <div style="width: 20px;max-width: 20px;">
+                @if (job.State == JobStates.Running)
+                {
+                    <HxSpinner Size="SpinnerSize.Small" />
+                }
+                </div>
+            </ItemTemplate>
+        </HxGridColumn>
         <HxGridColumn HeaderText="Name" ItemTextSelector="x => x.Name" />
-        <HxGridColumn HeaderText="Next Run" ItemTextSelector="@(x => RenderTime(x.NextJobRunTime))" />
-        <HxGridColumn HeaderText="Last Message" ItemTextSelector="x => x.LastJobRunMessage" />
+        <HxGridColumn HeaderText="Cron" ItemTextSelector="x => x.CronString" />
+        <HxGridColumn HeaderText="Next Run" ItemTextSelector="@(x => RenderTimeDifference(x.NextJobRunTime))" />
         <HxGridColumn HeaderText="Last State" ItemTextSelector="x => x.LastJobRunState.ToString()" />
         <HxGridColumn HeaderText="Last Run" ItemTextSelector="@(x => RenderTime(x.LastJobRunTime))" />
-        <HxGridColumn HeaderText="Cron" ItemTextSelector="x => x.CronString" />
+        <HxGridColumn HeaderText="Last Message" ItemTextSelector="x => x.LastJobRunMessage" />
+        <HxGridColumn>
+            <ItemTemplate Context="job">
+                <div style="width: 150px;max-width: 150px;">
+                    <HxButton Icon="BootstrapIcon.PlayCircle" Enabled="job.State != JobStates.Running" OnClick="async () => await Execute(job)" Color="ThemeColor.Primary" style="margin-right:5px" />
+                    <HxButton Icon="BootstrapIcon.Calendar" Enabled="job.State == JobStates.Stopped" OnClick="async () => await Start(job)" Color="ThemeColor.Secondary" style="margin-right:5px" />
+                    <HxButton Icon="BootstrapIcon.StopCircle" Enabled="job.State != JobStates.Stopped" OnClick="async () => await Stop(job)" Color="ThemeColor.Danger" />
+                </div>
+            </ItemTemplate>
+        </HxGridColumn>
     </Columns>
 </HxGrid>
 <p>
@@ -40,19 +57,18 @@
             return "";
         return time.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss");
     }
-    private void HandleAddInformationButtonClick()
+    string RenderTimeDifference(DateTimeOffset time)
     {
-        Messenger.AddInformation(title: "Data encrypted", message: "All your data has been encrypted. To decrypt your data share $100 with all your teammates.");
-    }
-
-    private void HandleAddWarningButtonClick()
-    {
-        Messenger.AddWarning(title: "Bio hazard!", message: "Bio hazard detected in your office!");
-    }
-
-    private void HandleAddErrorButtonClick()
-    {
-        Messenger.AddError(title: "Error", message: "An error occurred during showing messenger message.");
+        if (time == DateTimeOffset.MinValue)
+            return "";
+        var timeSpan = time - DateTimeOffset.UtcNow;
+        if (timeSpan < TimeSpan.FromMinutes(1))
+            return timeSpan.Seconds + "s";
+        if (timeSpan < TimeSpan.FromHours(1))
+            return timeSpan.Minutes + "m " + timeSpan.Seconds + "s";
+        if (timeSpan < TimeSpan.FromDays(1))
+            return timeSpan.Hours + "h " + timeSpan.Minutes + "m";
+        return timeSpan.Days + "days";
     }
     private async Task OpenMessageBox()
     {
