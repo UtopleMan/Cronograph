@@ -5,8 +5,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <StaticWebAssetBasePath>cronograph</StaticWebAssetBasePath>
-    <DeployOnBuild>true</DeployOnBuild>
-    <PublishOnBuild>true</PublishOnBuild>
+    <!--<DeployOnBuild>true</DeployOnBuild>-->
+    <!--<PublishOnBuild>true</PublishOnBuild>-->
   </PropertyGroup>
 
   <ItemGroup>

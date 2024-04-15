@@ -36,7 +36,7 @@
     <EmbeddedResource Include="..\Cronograph.Client\obj\Debug\net8.0\browser-wasm\PubTmp\Out\**\*">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\Cronograph.Client\bin\Release\net8.0\**\*">
+    <EmbeddedResource Include="..\blazor\**\*">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
@@ -45,17 +45,12 @@
 			<Compile Remove="blazorapp\**" />
 			<Compile Remove="packages\**" />
 			<Content Remove="blazorapp\**" />
-			<!--<EmbeddedResource Remove="..\Cronograph.Client\obj\Debug\net8.0\browser-wasm\PubTmp\Out\wwwroot\cronograph\**" />-->
 			<EmbeddedResource Remove="blazorapp\**" />
 			<EmbeddedResource Remove="packages\**" />
 			<None Remove="blazorapp\**" />
 			<None Remove="packages\**" />
   </ItemGroup>
-  
-  <ItemGroup>
-    <EmbeddedResource Include="obj\Debug\net8.0\Microsoft.Extensions.FileProviders.Embedded.Manifest.xml" />
-  </ItemGroup>
-  
+
   <ItemGroup>
     <None Include="../../README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
