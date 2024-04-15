@@ -22,7 +22,7 @@ cronograph.AddOneShot("Test one shot job", async (cancellationToken) =>
     Console.WriteLine("One time boom!");
     await Task.Delay(10000);
     Console.WriteLine("One time boom! Done!");
-}, "0 1 * * * *", isSingleton: true);
+}, "*/22 * * * * *", isSingleton: true);
 
 cronograph.AddScheduledService<MyService>("Test service", "*/18 * * * * *");
 cronograph.AddScheduledService<MyFailingService>("Test failing service", "*/15 * * * * *");

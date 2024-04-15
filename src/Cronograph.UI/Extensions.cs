@@ -14,29 +14,32 @@ public static class Extensions
         MapFiles(physicalDir, subPath, manifestEmbeddedProvider, applicationBuilder);
 
         endpointBuilder.MapGet(subPath + "/jobs", (ICronographStore store) => store.GetJobs());
-        endpointBuilder.MapPost(subPath + "/jobs/execute", async (HttpRequest request, ICronograph cronograph, ICronographStore store) =>
+        endpointBuilder.MapPost(subPath + "/jobs/execute", async (HttpRequest request, IDateTime dateTime, ICronographStore store) =>
         {
             var jobName = await request.ReadFromJsonAsync<JobName>();
             if (jobName == null || jobName.Name == null)
                 return;
             var job = store.GetJob(jobName.Name);
-            cronograph.ExecuteJob(job, default);
+            job = job with { State = JobStates.Waiting, NextJobRunTime = dateTime.UtcNow };
+            store.UpsertJob(job);
         });
-        endpointBuilder.MapPost(subPath + "/jobs/start", async (HttpRequest request, ICronograph cronograph, ICronographStore store) =>
+        endpointBuilder.MapPost(subPath + "/jobs/start", async (HttpRequest request, IDateTime dateTime, ICronographStore store) =>
         {
             var jobName = await request.ReadFromJsonAsync<JobName>();
             if (jobName == null || jobName.Name == null)
                 return;
             var job = store.GetJob(jobName.Name);
-            cronograph.StartJob(job, default);
+            job = job with { State = JobStates.Waiting, NextJobRunTime = job.CronString.ToCron().GetNextOccurrence(dateTime.UtcNow, TimeZoneInfo.Utc) ?? DateTimeOffset.MinValue };
+            store.UpsertJob(job);
         });
-        endpointBuilder.MapPost(subPath + "/jobs/stop", async (HttpRequest request, ICronograph cronograph, ICronographStore store) =>
+        endpointBuilder.MapPost(subPath + "/jobs/stop", async (HttpRequest request, IDateTime dateTime, ICronographStore store) =>
         {
             var jobName = await request.ReadFromJsonAsync<JobName>();
             if (jobName == null || jobName.Name == null)
                 return;
             var job = store.GetJob(jobName.Name);
-            cronograph.StopJob(job, default);
+            job = job with { State = JobStates.Stopped, NextJobRunTime = DateTimeOffset.MinValue };
+            store.UpsertJob(job);
         });
         endpointBuilder.Map(subPath + "/{**:nonfile}", async cnt =>
         {

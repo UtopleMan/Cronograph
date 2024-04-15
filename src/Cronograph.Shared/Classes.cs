@@ -73,9 +73,6 @@ public interface ICronograph
     void AddJob(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false);
     void AddOneShot(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false);
     void AddScheduledService<T>(string name, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false) where T : IScheduledService;
-    Task ExecuteJob(Job job, CancellationToken stoppingToken);
-    void StartJob(Job job, CancellationToken stoppingToken);
-    void StopJob(Job job, CancellationToken stoppingToken);
 }
 public interface IScheduledService
 {

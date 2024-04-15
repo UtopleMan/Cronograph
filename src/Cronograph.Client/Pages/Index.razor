@@ -33,9 +33,9 @@
     </Columns>
 </HxGrid>
 <p>
-    <HxButton Text="Run now" Enabled="selectedJobs.Any()" OnClick="async () => await Execute(selectedJobs)" Color="ThemeColor.Primary" />
-    <HxButton Text="Schedule" Enabled="selectedJobs.Any()" OnClick="async () => await Start(selectedJobs)" Color="ThemeColor.Secondary" />
-    <HxButton Text="Stop" Enabled="selectedJobs.Any()" OnClick="async () => await Stop(selectedJobs)" Color="ThemeColor.Danger" />
+    <HxButton Icon="BootstrapIcon.PlayCircle" Text="Run now" Enabled="selectedJobs.Any()" OnClick="async () => await Execute(selectedJobs)" Color="ThemeColor.Primary" />
+    <HxButton Icon="BootstrapIcon.Calendar" Text="Schedule" Enabled="selectedJobs.Any()" OnClick="async () => await Start(selectedJobs)" Color="ThemeColor.Secondary" />
+    <HxButton Icon="BootstrapIcon.StopCircle" Text="Stop" Enabled="selectedJobs.Any()" OnClick="async () => await Stop(selectedJobs)" Color="ThemeColor.Danger" />
 </p>
 @code {
     private Timer timer;
