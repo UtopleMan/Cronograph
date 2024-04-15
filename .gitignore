@@ -354,3 +354,4 @@ MigrationBackup/
 
 # wwwroot
 wwwroot/**/*
+/src/blazor
