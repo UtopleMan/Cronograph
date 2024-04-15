@@ -5,7 +5,7 @@
     <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
 
     <Title>Cronograph.UI</Title>
     <VersionSuffix>$(VersionSuffix)</VersionSuffix>
