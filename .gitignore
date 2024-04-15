@@ -354,4 +354,5 @@ MigrationBackup/
 
 # wwwroot
 wwwroot/**/*
-/src/blazor
+/src/blazor/**/*
+/src/Cronograph.UI/obj/Debug/net8.0/Microsoft.Extensions.FileProviders.Embedded.Manifest.xml
