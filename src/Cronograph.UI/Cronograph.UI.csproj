@@ -36,7 +36,7 @@
     <EmbeddedResource Include="..\Cronograph.Client\obj\Debug\net8.0\browser-wasm\PubTmp\Out\**\*">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\Cronograph\src\Cronograph.Client\bin\Release\net8.0\**\*">
+    <EmbeddedResource Include="..\Cronograph.Client\bin\Release\net8.0\**\*">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
