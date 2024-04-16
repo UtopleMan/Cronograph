@@ -8,6 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MongoDB.Driver" Version="2.25.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Cronograph.MongoDb\Cronograph.MongoDb.csproj" />
     <ProjectReference Include="..\Cronograph.UI\Cronograph.UI.csproj" />
     <ProjectReference Include="..\Cronograph\Cronograph.csproj" />
   </ItemGroup>

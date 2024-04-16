@@ -1,9 +1,19 @@
 ﻿using Cronograph;
+using Cronograph.MongoDb;
 using Cronograph.Shared;
 using Cronograph.UI;
+using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddCronograph(builder.Configuration);
+
+builder.Services.AddCronograph(builder.Configuration, 
+    (c) => 
+    {
+        var mongoUrl = new MongoUrl("mongodb://localhost:27017");
+        var mongoClientSettings = MongoClientSettings.FromUrl(mongoUrl);
+        return new MongoDbStore(new MongoClient(mongoClientSettings), new DateTimeService());
+    });
+
 builder.Services.AddSingleton<MyService>();
 builder.Services.AddSingleton<MyFailingService>();
 var app = builder.Build();

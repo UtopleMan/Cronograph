@@ -2,4 +2,5 @@
 public interface IDateTime
 {
     DateTimeOffset UtcNow { get; }
+    long EpochUtcNow { get; }
 }
