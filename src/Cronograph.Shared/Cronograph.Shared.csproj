@@ -22,7 +22,7 @@
 			<RepositoryType>GIT</RepositoryType>
 			<NeutralLanguage>en-US</NeutralLanguage>
 			<Description>Cronograph is a simple Cronjob runner created as a HangFire replacement. Cronograph is easily testable and integrates well into Microsoft.Extensions.DependencyInjection</Description>
-			<Copyright>Copyright 2022</Copyright>
+			<Copyright>Copyright 2024</Copyright>
 	</PropertyGroup>
 
   <ItemGroup>

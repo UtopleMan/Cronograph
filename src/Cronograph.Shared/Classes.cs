@@ -54,25 +54,11 @@ public class JobName
 {
     public string Name { get; set; }
 }
-public interface ICronographStore
-{
-    void UpsertJob(Job job);
-    void UpsertJobRun(JobRun jobRun);
-    Job GetJob(string jobName);
-    List<Job> GetJobs();
-    List<JobRun> GetJobRuns(Job job);
-    ICronographLock GetLock();
-}
-public interface ICronographLock
-{
-    Task<bool> CanRun(Job job);
-    Task Release(Job job);
-}
 public interface ICronograph
 {
-    void AddJob(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false);
-    void AddOneShot(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false);
-    void AddScheduledService<T>(string name, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false) where T : IScheduledService;
+    Task AddJob(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false);
+    Task AddOneShot(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false);
+    Task AddScheduledService<T>(string name, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false) where T : IScheduledService;
 }
 public interface IScheduledService
 {

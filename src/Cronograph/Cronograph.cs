@@ -21,32 +21,32 @@ public class Cronograph : BackgroundService, ICronograph
         this.cache = cache;
         this.provider = services.BuildServiceProvider();
     }
-    public void AddJob(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false)
+    public async Task AddJob(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false)
     {
         var cronExpression = cron.ToCron();
         var jobFunction = CreateJobFunction(name, call, cronExpression);
         cache.UpsertJobFunction(jobFunction);
 
         var job = CreateJob(name, "job()", cron, timeZone, isSingleton);
-        store.UpsertJob(job with { NextJobRunTime = cronExpression.GetNextOccurrence(dateTime.UtcNow, TimeZoneInfo.Utc) ?? DateTimeOffset.MinValue });
+        await store.UpsertJob(job with { NextJobRunTime = cronExpression.GetNextOccurrence(dateTime.UtcNow, TimeZoneInfo.Utc) ?? DateTimeOffset.MinValue });
     }
 
-    public void AddOneShot(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false)
+    public async Task AddOneShot(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false)
     {
         var cronExpression = cron.ToCron();
         var jobFunction = CreateJobFunction(name, call, cronExpression);
         cache.UpsertJobFunction(jobFunction);
         var job = CreateJob(name, "oneshot()", cron, timeZone, isSingleton);
-        store.UpsertJob(job with { OneShot = true, NextJobRunTime = cronExpression.GetNextOccurrence(dateTime.UtcNow, TimeZoneInfo.Utc) ?? DateTimeOffset.MinValue });
+        await store.UpsertJob(job with { OneShot = true, NextJobRunTime = cronExpression.GetNextOccurrence(dateTime.UtcNow, TimeZoneInfo.Utc) ?? DateTimeOffset.MinValue });
     }
-    public void AddScheduledService<T>(string name, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false) where T : IScheduledService
+    public async Task AddScheduledService<T>(string name, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false) where T : IScheduledService
     {
         var service = provider.GetRequiredService<T>();
         var cronExpression = cron.ToCron();
         var jobFunction = CreateJobFunction(name, service.ExecuteAsync, cronExpression);
         cache.UpsertJobFunction(jobFunction);
         var job = CreateJob(name, service.GetType().FullName, cron, timeZone, isSingleton);
-        store.UpsertJob(job with { NextJobRunTime = cronExpression.GetNextOccurrence(dateTime.UtcNow, TimeZoneInfo.Utc) ?? DateTimeOffset.MinValue });
+        await store.UpsertJob(job with { NextJobRunTime = cronExpression.GetNextOccurrence(dateTime.UtcNow, TimeZoneInfo.Utc) ?? DateTimeOffset.MinValue });
     }
 
     Job CreateJob(string name, string className, string cron, TimeZoneInfo? timeZone, bool isSingleton)
@@ -64,7 +64,7 @@ public class Cronograph : BackgroundService, ICronograph
         {
             try
             {
-                var jobs = GetJobsReadyToRun();
+                var jobs = await GetJobsReadyToRun();
                 if (jobs != null && !jobs.Any())
                 {
                     await Task.Delay(1000, stoppingToken);
@@ -76,12 +76,12 @@ public class Cronograph : BackgroundService, ICronograph
                     return;
                 foreach (var job in jobs)
                 {
-                    var foundJob = store.GetJob(job.Name);
+                    var foundJob = await store.GetJob(job.Name);
                     if (foundJob.State != JobStates.Stopped)
                         await ExecuteJob(foundJob, stoppingToken);
                 }
                 
-                var allJobs = store.GetJobs();
+                var allJobs = await store.GetJobs();
                 logger.LogTrace("Current job states are [{allJobs}]", allJobs.Select(x => x.Name + ":" + x.State).Aggregate((c, n) => c + ", " + n));
             }
             catch (Exception exception)
@@ -116,7 +116,7 @@ public class Cronograph : BackgroundService, ICronograph
             job = job with { NextJobRunTime = next };
             logger.LogTrace("{now} {next} {diff}", now, next, next - now);
         }
-        store.UpsertJob(job);
+        await store.UpsertJob(job);
 #pragma warning disable CS4014
         Task.Run(
             async () =>
@@ -140,7 +140,7 @@ public class Cronograph : BackgroundService, ICronograph
     {
         var start = dateTime.UtcNow;
         var run = new JobRun(GetId(), job.Name, JobRunStates.Running, start);
-        store.UpsertJobRun(run);
+        await store.UpsertJobRun(run);
 
         var jobFunction = cache.GetJobFunction(job.Name);
         try
@@ -153,10 +153,10 @@ public class Cronograph : BackgroundService, ICronograph
                 job = job with { State = JobStates.Finished };
 
             job = job with { LastJobRunState = JobRunStates.Success, LastJobRunMessage = "", LastJobRunTime = end };
-            store.UpsertJob(job);
+            await store.UpsertJob(job);
 
             run = run with { State = JobRunStates.Success, End = end };
-            store.UpsertJobRun(run);
+            await store.UpsertJobRun(run);
         }
         catch (Exception exception)
         {
@@ -165,7 +165,7 @@ public class Cronograph : BackgroundService, ICronograph
 
             var end = dateTime.UtcNow;
             run = run with { State = JobRunStates.Failed, End = end, ErrorMessage = errorMessage, ExceptionDetails = exception.ToString() };
-            store.UpsertJobRun(run);
+            await store.UpsertJobRun(run);
 
             if (job.OneShot == true)
                 job = job with { State = JobStates.Stopped };
@@ -173,7 +173,7 @@ public class Cronograph : BackgroundService, ICronograph
                 job = job with { State = JobStates.Finished };
 
             job = job with { LastJobRunState = JobRunStates.Failed, LastJobRunMessage = errorMessage, LastJobRunTime = end };
-            store.UpsertJob(job);
+            await store.UpsertJob(job);
         }
     }
     string GetId()
@@ -181,5 +181,5 @@ public class Cronograph : BackgroundService, ICronograph
         return NewId.Next().ToString("N");
     }
 
-    IEnumerable<Job> GetJobsReadyToRun() => store.GetJobs().Where(x => x.NextJobRunTime != DateTimeOffset.MinValue && x.NextJobRunTime <= dateTime.UtcNow);
+    async Task<IEnumerable<Job>> GetJobsReadyToRun() => (await store.GetJobs()).Where(x => x.NextJobRunTime != DateTimeOffset.MinValue && x.NextJobRunTime <= dateTime.UtcNow);
 }

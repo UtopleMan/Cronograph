@@ -19,27 +19,27 @@ public static class Extensions
             var jobName = await request.ReadFromJsonAsync<JobName>();
             if (jobName == null || jobName.Name == null)
                 return;
-            var job = store.GetJob(jobName.Name);
+            var job = await store.GetJob(jobName.Name);
             job = job with { State = JobStates.Waiting, NextJobRunTime = dateTime.UtcNow };
-            store.UpsertJob(job);
+            await store.UpsertJob(job);
         });
         endpointBuilder.MapPost(subPath + "/jobs/start", async (HttpRequest request, IDateTime dateTime, ICronographStore store) =>
         {
             var jobName = await request.ReadFromJsonAsync<JobName>();
             if (jobName == null || jobName.Name == null)
                 return;
-            var job = store.GetJob(jobName.Name);
+            var job = await store.GetJob(jobName.Name);
             job = job with { State = JobStates.Waiting, NextJobRunTime = job.CronString.ToCron().GetNextOccurrence(dateTime.UtcNow, TimeZoneInfo.Utc) ?? DateTimeOffset.MinValue };
-            store.UpsertJob(job);
+            await store.UpsertJob(job);
         });
         endpointBuilder.MapPost(subPath + "/jobs/stop", async (HttpRequest request, IDateTime dateTime, ICronographStore store) =>
         {
             var jobName = await request.ReadFromJsonAsync<JobName>();
             if (jobName == null || jobName.Name == null)
                 return;
-            var job = store.GetJob(jobName.Name);
+            var job = await store.GetJob(jobName.Name);
             job = job with { State = JobStates.Stopped, NextJobRunTime = DateTimeOffset.MinValue };
-            store.UpsertJob(job);
+            await store.UpsertJob(job);
         });
         endpointBuilder.Map(subPath + "/{**:nonfile}", async cnt =>
         {

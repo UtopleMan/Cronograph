@@ -3,18 +3,18 @@ using Microsoft.Extensions.Configuration;
 using System.Collections.Concurrent;
 
 namespace Cronograph;
-
 internal class InMemCronographStore(IConfiguration configuration) : ICronographStore
 {
     private ConcurrentDictionary<string, Job> jobs = new();
     private ConcurrentDictionary<string, JobRun> jobRuns = new();
 
-    public void UpsertJob(Job job)
+    public Task UpsertJob(Job job)
     {
         jobs.AddOrUpdate(job.Name, job, (name, oldJob) => job);
+        return Task.CompletedTask;
     }
 
-    public void UpsertJobRun(JobRun jobRun)
+    public Task UpsertJobRun(JobRun jobRun)
     {
         jobRuns.AddOrUpdate(jobRun.Id, jobRun, (name, oldJob) => jobRun);
         var count = configuration.GetValue<int>("Cronograph:MaxJobRuns");
@@ -24,21 +24,22 @@ internal class InMemCronographStore(IConfiguration configuration) : ICronographS
             foreach (var jobRunKey in jobRuns.OrderBy(x => x.Value.Start).Take(jobRuns.Count - count))
                 jobRuns.Remove(jobRunKey.Key, out _);
         }
+        return Task.CompletedTask;
     }
 
-    public List<Job> GetJobs()
+    public Task<IEnumerable<Job>> GetJobs()
     {
-        return jobs.Values.ToList();
+        return Task.FromResult((IEnumerable<Job>) jobs.Values);
     }
 
-    public List<JobRun> GetJobRuns(Job job)
+    public Task<IEnumerable<JobRun>> GetJobRuns(Job job)
     {
-        return jobRuns.Values.Where(x => x.JobName == job.Name).ToList();
+        return Task.FromResult(jobRuns.Values.Where(x => x.JobName == job.Name));
     }
 
-    public Job GetJob(string jobName)
+    public Task<Job> GetJob(string jobName)
     {
-        return jobs.Values.Single(x => x.Name == jobName);
+        return Task.FromResult(jobs.Values.Single(x => x.Name == jobName));
     }
     public ICronographLock GetLock() 
     {
