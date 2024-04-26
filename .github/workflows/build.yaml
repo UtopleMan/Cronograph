@@ -35,7 +35,7 @@ jobs:
         dotnet build src/Cronograph.Client/Cronograph.Client.csproj --configuration Release
         dotnet publish src/Cronograph.Client/Cronograph.Client.csproj --configuration Release --output src/blazor
         dotnet build src/Cronograph.UI/Cronograph.UI.csproj --configuration Release
-        dotnet build src/Cronograph.UI/Cronograph.MongoDb.csproj --configuration Release
+        dotnet build src/Cronograph.MongoDb/Cronograph.MongoDb.csproj --configuration Release
     - name: Test
       run: dotnet test src --configuration Release --no-build --verbosity normal
     - name: Pack
@@ -43,7 +43,7 @@ jobs:
         dotnet pack src/Cronograph.Shared/Cronograph.Shared.csproj -o packages --configuration Release --no-build --verbosity normal -p:PackageVersion=1.0.${{ github.run_number }}
         dotnet pack src/Cronograph/Cronograph.csproj -o packages --configuration Release --no-build --verbosity normal -p:PackageVersion=1.0.${{ github.run_number }}
         dotnet pack src/Cronograph.UI/Cronograph.UI.csproj -o packages --configuration Release --no-build --verbosity normal -p:PackageVersion=1.0.${{ github.run_number }}
-        dotnet pack src/Cronograph.UI/Cronograph.MongoDb.csproj -o packages --configuration Release --no-build --verbosity normal -p:PackageVersion=1.0.${{ github.run_number }}
+        dotnet pack src/Cronograph.MongoDb/Cronograph.MongoDb.csproj -o packages --configuration Release --no-build --verbosity normal -p:PackageVersion=1.0.${{ github.run_number }}
     - name: Push
       run: |
        dotnet nuget push packages/Cronograph.1.0.${{ github.run_number }}.nupkg -k ${{ secrets.NUGET_APIKEY }} -s https://api.nuget.org/v3/index.json
