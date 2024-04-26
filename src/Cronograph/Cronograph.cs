@@ -70,7 +70,7 @@ public class Cronograph : BackgroundService, ICronograph
                     await Task.Delay(1000, stoppingToken);
                     continue;
                 }
-                logger.LogTrace("Job(s) that are ready to run are [{jobs}]", jobs.Select(x => x.Name).Aggregate((c, n) => c + ", " + n));
+                logger.LogTrace("Job(s) that are ready to run are [{jobs}]", GetJobs(jobs));
 
                 if (stoppingToken.IsCancellationRequested)
                     return;
@@ -82,13 +82,27 @@ public class Cronograph : BackgroundService, ICronograph
                 }
                 
                 var allJobs = await store.GetJobs();
-                logger.LogTrace("Current job states are [{allJobs}]", allJobs.Select(x => x.Name + ":" + x.State).Aggregate((c, n) => c + ", " + n));
+                logger.LogTrace("Current job states are [{allJobs}]", GetJobsAndState(allJobs));
             }
             catch (Exception exception)
             {
                 logger.LogWarning(exception, "Error caught in Cronograph.ExecuteAsync(). Continuing");
             }
         }
+    }
+
+    private string GetJobsAndState(IEnumerable<Job> jobs)
+    {
+        if (jobs == null || !jobs.Any())
+            return "";
+        return jobs.Select(x => x.Name + ":" + x.State).Aggregate((c, n) => c + ", " + n);
+    }
+
+    private string GetJobs(IEnumerable<Job>? jobs)
+    {
+        if (jobs == null || !jobs.Any())
+            return "";
+        return jobs.Select(x => x.Name).Aggregate((c, n) => c + ", " + n);
     }
 
     async Task ExecuteJob(Job job, CancellationToken stoppingToken)
