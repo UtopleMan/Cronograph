@@ -30,15 +30,14 @@ public class Cronograph : BackgroundService, ICronograph
         var job = CreateJob(name, "job()", cron, timeZone, isSingleton);
         await store.UpsertJob(job with { NextJobRunTime = GetNextOccurrence(job) });
     }
-
-    private DateTimeOffset GetNextOccurrence(Job job)
+    public async Task AddJob(string name, Func<CancellationToken, Task> call, TimeSpan timeSpan, TimeZoneInfo? timeZone = null, bool isSingleton = false)
     {
-        if (job.TimingType == TimingTypes.Cron)
-            return job.CronString.ToCron().GetNextOccurrence(dateTime.UtcNow, TimeZoneInfo.Utc) ?? DateTimeOffset.MinValue;
-        else
-            return dateTime.UtcNow.Add(job.TimeSpan);
-    }
+        var jobFunction = CreateJobFunction(name, call, timeSpan);
+        cache.UpsertJobFunction(jobFunction);
 
+        var job = CreateJob(name, "job()", timeSpan, timeZone, isSingleton);
+        await store.UpsertJob(job with { NextJobRunTime = GetNextOccurrence(job) });
+    }
     public async Task AddOneShot(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false)
     {
         var cronExpression = cron.ToCron();
@@ -64,7 +63,13 @@ public class Cronograph : BackgroundService, ICronograph
         var job = CreateJob(name, service.GetType().FullName, timeSpan, timeZone, isSingleton);
         await store.UpsertJob(job with { NextJobRunTime = GetNextOccurrence(job) });
     }
-
+    private DateTimeOffset GetNextOccurrence(Job job)
+    {
+        if (job.TimingType == TimingTypes.Cron)
+            return job.CronString.ToCron().GetNextOccurrence(dateTime.UtcNow, TimeZoneInfo.Utc) ?? DateTimeOffset.MinValue;
+        else
+            return dateTime.UtcNow.Add(job.TimeSpan);
+    }
     Job CreateJob(string name, string className, string cron, TimeZoneInfo? timeZone, bool isSingleton)
     {
         var usedTimeZone = timeZone;
