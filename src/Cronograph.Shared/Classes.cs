@@ -1,13 +1,20 @@
 ﻿namespace Cronograph.Shared;
+public enum TimingTypes
+{
+    Cron,
+    TimeSpan
+}
 
 public record Job
 {
     public Job() { }
-    public Job(string name, string className, string cronString, int timeZone, bool isSingleton = false)
+    public Job(string name, string className, TimingTypes timingType, string cronString, TimeSpan timeSpan, int timeZone, bool isSingleton = false)
     {
         Name = name;
         ClassName = className;
+        TimingType = timingType;
         CronString = cronString;
+        TimeSpan = timeSpan;
         TimeZone = timeZone;
         IsSingleton = isSingleton;
         NextJobRunTime = DateTimeOffset.MinValue;
@@ -19,7 +26,9 @@ public record Job
     }
     public string Name { get; set; }
     public string ClassName { get; set; }
+    public TimingTypes TimingType { get; set; }
     public string CronString { get; set; }
+    public TimeSpan TimeSpan { get; set; }
     public int TimeZone { get; set; }
     public bool IsSingleton { get; }
     public DateTimeOffset NextJobRunTime { get; set; }
@@ -59,6 +68,7 @@ public interface ICronograph
     Task AddJob(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false);
     Task AddOneShot(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false);
     Task AddScheduledService<T>(string name, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false) where T : IScheduledService;
+    Task AddScheduledService<T>(string name, TimeSpan timeSpan, TimeZoneInfo? timeZone = default, bool isSingleton = false) where T : IScheduledService;
 }
 public interface IScheduledService
 {

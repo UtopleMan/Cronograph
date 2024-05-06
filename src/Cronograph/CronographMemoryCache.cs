@@ -1,4 +1,5 @@
-﻿using Cronos;
+﻿using Cronograph.Shared;
+using Cronos;
 
 namespace Cronograph;
 
@@ -17,5 +18,4 @@ public class CronographMemoryCache
         return jobFunctions[name];
     }
 }
-public record JobFunction(string JobName, Func<CancellationToken, Task> Action, CronExpression CronExpression);
-
+public record JobFunction(string JobName, Func<CancellationToken, Task> Action, TimingTypes TimingType, CronExpression? CronExpression, TimeSpan? TimeSpan);

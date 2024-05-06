@@ -3,6 +3,7 @@
 @using System.Text.Json;
 
 @page "/"
+<label>@(time)</label>
 <HxGrid @ref="grid" TItem="Job" DataProvider="GetGridData" PageSize="30" Responsive="true" MultiSelectionEnabled="true" @bind-SelectedDataItems="selectedJobs">
     <Columns>
         <HxGridColumn>
@@ -16,10 +17,11 @@
             </ItemTemplate>
         </HxGridColumn>
         <HxGridColumn HeaderText="Name" ItemTextSelector="x => x.Name" />
-        <HxGridColumn HeaderText="Cron" ItemTextSelector="x => x.CronString" />
+        <HxGridColumn HeaderText="Cron" ItemTextSelector="x => RenderCron(x)" />
         <HxGridColumn HeaderText="Next Run" ItemTextSelector="@(x => RenderTimeDifference(x.NextJobRunTime))" />
+        <HxGridColumn HeaderText="Next Run Time" ItemTextSelector="@(x => RenderTime(x.NextJobRunTime))" />
         <HxGridColumn HeaderText="Last State" ItemTextSelector="x => x.LastJobRunState.ToString()" />
-        <HxGridColumn HeaderText="Last Run" ItemTextSelector="@(x => RenderTime(x.LastJobRunTime))" />
+        <HxGridColumn HeaderText="Last Run Time" ItemTextSelector="@(x => RenderTime(x.LastJobRunTime))" />
         <HxGridColumn HeaderText="Last Message" ItemTextSelector="x => x.LastJobRunMessage" />
         <HxGridColumn>
             <ItemTemplate Context="job">
@@ -42,6 +44,7 @@
     private string SomeText = "Hej";
     private bool disposed = false;
     private string filter = "";
+    private string time = "";
     private HxGrid<Job> grid;
     private HashSet<Job> selectedJobs = new();
     [Inject]
@@ -51,6 +54,22 @@
     [Inject] 
     IHxMessengerService Messenger { get; set; }
 
+    string RenderCron(Job job)
+    {
+        if (job.TimingType == TimingTypes.Cron)
+            return job.CronString;
+
+        var result = "Every ";
+        if (job.TimeSpan.Days > 0)
+            result += job.TimeSpan.Days + "d ";
+        if (job.TimeSpan.Hours > 0)
+            result += job.TimeSpan.Hours + "h ";
+        if (job.TimeSpan.Minutes > 0)
+            result += job.TimeSpan.Minutes + "m ";
+        if (job.TimeSpan.Seconds > 0)
+            result += job.TimeSpan.Seconds + "s ";
+        return result;
+    }
     string RenderTime(DateTimeOffset time)
     {
         if (time == DateTimeOffset.MinValue)
@@ -62,6 +81,9 @@
         if (time == DateTimeOffset.MinValue)
             return "";
         var timeSpan = time - DateTimeOffset.UtcNow;
+        if (timeSpan < TimeSpan.Zero)
+            return $"Still running.. ({-timeSpan.Seconds}s)";
+
         if (timeSpan < TimeSpan.FromMinutes(1))
             return timeSpan.Seconds + "s";
         if (timeSpan < TimeSpan.FromHours(1))
@@ -79,10 +101,15 @@
     {
         var confirmResult = await MessageBox.ConfirmAsync("Confirm", "Do you really want to ...?");
     }
-
+    void UpdateTime()
+    {
+        time = DateTime.UtcNow.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss");
+        InvokeAsync(StateHasChanged);
+    }
     void LocationChanged(object sender, LocationChangedEventArgs e)
     {
         timer.Dispose();
+
     }
     protected override Task OnAfterRenderAsync(bool firstRender)
     {
@@ -95,6 +122,7 @@
     private async Task UpdateView()
     {
         await grid.RefreshDataAsync();
+        UpdateTime();
     }
     private async Task<GridDataProviderResult<Job>> GetGridData(GridDataProviderRequest<Job> request)
     {
