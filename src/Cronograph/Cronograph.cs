@@ -123,14 +123,14 @@ public class Cronograph : BackgroundService, ICronograph
         }
     }
 
-    private string GetJobsAndState(IEnumerable<Job> jobs)
+    string GetJobsAndState(IEnumerable<Job> jobs)
     {
         if (jobs == null || !jobs.Any())
             return "";
         return jobs.Select(x => x.Name + ":" + x.State).Aggregate((c, n) => c + ", " + n);
     }
 
-    private string GetJobs(IEnumerable<Job>? jobs)
+    string GetJobs(IEnumerable<Job>? jobs)
     {
         if (jobs == null || !jobs.Any())
             return "";
