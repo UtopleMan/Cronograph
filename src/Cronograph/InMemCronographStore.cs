@@ -21,7 +21,7 @@ internal class InMemCronographStore(IConfiguration configuration) : ICronographS
         if (count < 1) count = 1;
         if (jobRuns.Count > count) 
         {
-            foreach (var jobRunKey in jobRuns.OrderBy(x => x.Value.Start).Take(jobRuns.Count - count))
+            foreach (var jobRunKey in jobRuns.Where(x => x.Value?.Start != null).OrderBy(x => x.Value.Start).Take(jobRuns.Count - count))
                 jobRuns.Remove(jobRunKey.Key, out _);
         }
         return Task.CompletedTask;

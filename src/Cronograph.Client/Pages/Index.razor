@@ -127,11 +127,7 @@
     private async Task<GridDataProviderResult<Job>> GetGridData(GridDataProviderRequest<Job> request)
     {
         var list = await Http.GetFromJsonAsync<Job[]>("/cronograph/jobs");
-        return new GridDataProviderResult<Job>()
-            {
-                Data = list,
-                TotalCount = list.Count()
-            };
+        return request.ApplyTo(list);
     }
     protected async Task Stop(Job job)
     {
