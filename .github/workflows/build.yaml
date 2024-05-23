@@ -32,8 +32,7 @@ jobs:
       run: |
         dotnet build src/Cronograph.Shared/Cronograph.Shared.csproj --configuration Release
         dotnet build src/Cronograph/Cronograph.csproj --configuration Release
-        dotnet build src/Cronograph.Client/Cronograph.Client.csproj --configuration Release
-        dotnet publish src/Cronograph.Client/Cronograph.Client.csproj --configuration Release --output src/blazor
+        dotnet build src/Cronograph.Client/Cronograph.Client.csproj --configuration Release --output src/blazor
         dotnet build src/Cronograph.UI/Cronograph.UI.csproj --configuration Release
         dotnet build src/Cronograph.MongoDb/Cronograph.MongoDb.csproj --configuration Release
     - name: Test
@@ -50,3 +49,5 @@ jobs:
        dotnet nuget push packages/Cronograph.UI.1.0.${{ github.run_number }}.nupkg -k ${{ secrets.NUGET_APIKEY }} -s https://api.nuget.org/v3/index.json
        dotnet nuget push packages/Cronograph.Shared.1.0.${{ github.run_number }}.nupkg -k ${{ secrets.NUGET_APIKEY }} -s https://api.nuget.org/v3/index.json
        dotnet nuget push packages/Cronograph.MongoDb.1.0.${{ github.run_number }}.nupkg -k ${{ secrets.NUGET_APIKEY }} -s https://api.nuget.org/v3/index.json
+
+#         dotnet publish src/Cronograph.Client/Cronograph.Client.csproj --configuration Release --output src/blazor

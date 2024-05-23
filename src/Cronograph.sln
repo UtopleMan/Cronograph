@@ -13,7 +13,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cronograph.Client", "Cronog
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cronograph.Shared", "Cronograph.Shared\Cronograph.Shared.csproj", "{FC98E7B7-0048-4B16-9408-FE44CC02478D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cronograph.MongoDb", "Cronograph.MongoDb\Cronograph.MongoDb.csproj", "{8A3DEC24-6397-438F-8FB9-0400B87B14D0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cronograph.MongoDb", "Cronograph.MongoDb\Cronograph.MongoDb.csproj", "{8A3DEC24-6397-438F-8FB9-0400B87B14D0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{1B9D6734-3B88-42C2-9621-D8C023EA1D4E}"
+	ProjectSection(SolutionItems) = preProject
+		..\.github\workflows\build.yaml = ..\.github\workflows\build.yaml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
