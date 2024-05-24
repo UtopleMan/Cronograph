@@ -3,8 +3,23 @@
 @using System.Text.Json;
 
 @page "/"
-<label>@(time)</label>
-<HxGrid @ref="grid" TItem="Job" DataProvider="GetGridData" PageSize="30" Responsive="true" MultiSelectionEnabled="true" @bind-SelectedDataItems="selectedJobs">
+<div class="d-flex flex-row-reverse">
+    <HxButtonGroup CssClass="float-end">
+        <InputRadioGroup @bind-Value="PageSize">
+            <InputRadio id="radio16" class="btn-check" Value="@(16)" />
+            <label class="btn btn-outline-primary" for="radio16">16</label>
+            <InputRadio id="radio32" class="btn-check" Value="@(32)" />
+            <label class="btn btn-outline-primary" for="radio32">32</label>
+            <InputRadio id="radio64" class="btn-check" Value="@(64)" />
+            <label class="btn btn-outline-primary" for="radio64">64</label>
+            <InputRadio id="radio128" class="btn-check" Value="@(128)" />
+            <label class="btn btn-outline-primary" for="radio128">128</label>
+            <InputRadio id="radio256" class="btn-check" Value="@(256)" />
+            <label class="btn btn-outline-primary" for="radio256">256</label>
+        </InputRadioGroup>
+    </HxButtonGroup>
+</div>
+<HxGrid @ref="grid" TItem="Job" DataProvider="GetGridData" PageSize="@PageSize" Responsive="true" MultiSelectionEnabled="true" @bind-SelectedDataItems="selectedJobs">
     <Columns>
         <HxGridColumn>
             <ItemTemplate Context="job">
@@ -16,7 +31,13 @@
                 </div>
             </ItemTemplate>
         </HxGridColumn>
-        <HxGridColumn HeaderText="Name" ItemTextSelector="x => x.Name" />
+        <HxGridColumn ItemTextSelector="x => x.Name">
+            <HeaderTemplate>
+                <HxInputText @bind-Value="filter" BindEvent="BindEvent.OnInput" @bind-Value:after="grid.RefreshDataAsync" Placeholder="Filter.." 
+                    InputSize="InputSize.Small" />
+            </HeaderTemplate>
+        </HxGridColumn>
+
         <HxGridColumn HeaderText="Cron" ItemTextSelector="x => RenderCron(x)" />
         <HxGridColumn HeaderText="Next Run" ItemTextSelector="@(x => RenderTimeDifference(x.NextJobRunTime))" />
         <HxGridColumn HeaderText="Next Run Time" ItemTextSelector="@(x => RenderTime(x.NextJobRunTime))" />
@@ -34,6 +55,7 @@
         </HxGridColumn>
     </Columns>
 </HxGrid>
+
 <p>
     <HxButton Icon="BootstrapIcon.PlayCircle" Text="Run now" Enabled="selectedJobs.Any()" OnClick="async () => await Execute(selectedJobs)" Color="ThemeColor.Primary" />
     <HxButton Icon="BootstrapIcon.Calendar" Text="Schedule" Enabled="selectedJobs.Any()" OnClick="async () => await Start(selectedJobs)" Color="ThemeColor.Secondary" />
@@ -41,12 +63,12 @@
 </p>
 @code {
     private Timer timer;
-    private string SomeText = "Hej";
     private bool disposed = false;
     private string filter = "";
     private string time = "";
     private HxGrid<Job> grid;
     private HashSet<Job> selectedJobs = new();
+    private int PageSize = 16;
     [Inject]
     HttpClient Http { get; set; }
     [Inject] 
@@ -127,6 +149,8 @@
     private async Task<GridDataProviderResult<Job>> GetGridData(GridDataProviderRequest<Job> request)
     {
         var list = await Http.GetFromJsonAsync<Job[]>("/cronograph/jobs");
+        if (list != null && filter != null && filter.Length > 0)
+            list = list.Where(x => x.Name.ToLower().Contains(filter.ToLower())).ToArray();
         return request.ApplyTo(list);
     }
     protected async Task Stop(Job job)
