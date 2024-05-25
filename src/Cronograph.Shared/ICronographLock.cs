@@ -2,6 +2,7 @@
 
 public interface ICronographLock
 {
-    Task<bool> CanRun(Job job);
-    Task Release(Job job);
+    Task Initialize(CancellationToken cancellationToken);
+    Task<bool> TryLock(Job job, CancellationToken cancellationToken);
+    Task Unlock(Job job);
 }

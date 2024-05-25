@@ -8,13 +8,13 @@ internal class InMemCronographStore(IConfiguration configuration) : ICronographS
     private ConcurrentDictionary<string, Job> jobs = new();
     private ConcurrentDictionary<string, JobRun> jobRuns = new();
 
-    public Task UpsertJob(Job job)
+    public Task UpsertJob(Job job, CancellationToken cancellationToken)
     {
         jobs.AddOrUpdate(job.Name, job, (name, oldJob) => job);
         return Task.CompletedTask;
     }
 
-    public Task UpsertJobRun(JobRun jobRun)
+    public Task UpsertJobRun(JobRun jobRun, CancellationToken cancellationToken)
     {
         jobRuns.AddOrUpdate(jobRun.Id, jobRun, (name, oldJob) => jobRun);
         var count = configuration.GetValue<int>("Cronograph:MaxJobRuns");
@@ -27,17 +27,17 @@ internal class InMemCronographStore(IConfiguration configuration) : ICronographS
         return Task.CompletedTask;
     }
 
-    public Task<IEnumerable<Job>> GetJobs()
+    public Task<IEnumerable<Job>> GetJobs(CancellationToken cancellationToken)
     {
         return Task.FromResult((IEnumerable<Job>) jobs.Values);
     }
 
-    public Task<IEnumerable<JobRun>> GetJobRuns(Job job)
+    public Task<IEnumerable<JobRun>> GetJobRuns(Job job, CancellationToken cancellationToken)
     {
         return Task.FromResult(jobRuns.Values.Where(x => x.JobName == job.Name));
     }
 
-    public Task<Job> GetJob(string jobName)
+    public Task<Job> GetJob(string jobName, CancellationToken cancellationToken)
     {
         return Task.FromResult(jobs.Values.Single(x => x.Name == jobName));
     }
@@ -50,7 +50,13 @@ internal class InMemCronographLock : ICronographLock
 {
     private static Dictionary<string, bool> locks = new();
     private static object lockObject = new();
-    public Task<bool> CanRun(Job job)
+
+    public Task Initialize(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task<bool> TryLock(Job job, CancellationToken cancellationToken)
     {
         if (!locks.ContainsKey(job.Name))
         {
@@ -77,7 +83,7 @@ internal class InMemCronographLock : ICronographLock
         }
         return Task.FromResult(false);
     }
-    public Task Release(Job job)
+    public Task Unlock(Job job)
     {
         locks[job.Name] = false;
         return Task.CompletedTask;

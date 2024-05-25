@@ -8,7 +8,7 @@ public enum TimingTypes
 public record Job
 {
     public Job() { }
-    public Job(string name, string className, TimingTypes timingType, string cronString, TimeSpan timeSpan, int timeZone, bool isSingleton = false)
+    public Job(string name, string className, TimingTypes timingType, string cronString, TimeSpan timeSpan, int timeZone, bool isSingleton)
     {
         Name = name;
         ClassName = className;
@@ -30,7 +30,7 @@ public record Job
     public string CronString { get; set; }
     public TimeSpan TimeSpan { get; set; }
     public int TimeZone { get; set; }
-    public bool IsSingleton { get; }
+    public bool IsSingleton { get; set; }
     public DateTimeOffset NextJobRunTime { get; set; }
     public bool OneShot { get; set; }
     public JobStates State { get; set; }
@@ -65,11 +65,11 @@ public class JobName
 }
 public interface ICronograph
 {
-    Task AddJob(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false);
-    Task AddJob(string name, Func<CancellationToken, Task> call, TimeSpan timeSpan, TimeZoneInfo? timeZone = default, bool isSingleton = false);
-    Task AddOneShot(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false);
-    Task AddScheduledService<T>(string name, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false) where T : IScheduledService;
-    Task AddScheduledService<T>(string name, TimeSpan timeSpan, TimeZoneInfo? timeZone = default, bool isSingleton = false) where T : IScheduledService;
+    Task AddJob(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false, CancellationToken cancellationToken = default);
+    Task AddJob(string name, Func<CancellationToken, Task> call, TimeSpan timeSpan, TimeZoneInfo? timeZone = default, bool isSingleton = false, CancellationToken cancellationToken = default);
+    Task AddOneShot(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false, CancellationToken cancellationToken = default);
+    Task AddScheduledService<T>(string name, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false, CancellationToken cancellationToken = default) where T : IScheduledService;
+    Task AddScheduledService<T>(string name, TimeSpan timeSpan, TimeZoneInfo? timeZone = default, bool isSingleton = false, CancellationToken cancellationToken = default) where T : IScheduledService;
 }
 public interface IScheduledService
 {

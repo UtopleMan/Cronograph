@@ -4,12 +4,17 @@ namespace Cronograph;
 
 internal class AlwaysAllowCronographLock : ICronographLock
 {
-    public Task<bool> CanRun(Job job)
+    public Task Initialize(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task<bool> TryLock(Job job, CancellationToken cancellationToken)
     {
         return Task.FromResult(true);
     }
 
-    public Task Release(Job job)
+    public Task Unlock(Job job)
     {
         return Task.CompletedTask;
     }

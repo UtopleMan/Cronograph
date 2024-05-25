@@ -5,27 +5,40 @@ using MongoDB.Driver.Linq;
 
 namespace Cronograph.MongoDb;
 
-public class MongoDbStore(IMongoClient mongoClient, IDateTime dateTime) : ICronographStore
+public class MongoDbStore : ICronographStore
 {
     private readonly string DatabaseName = "cronograph";
     private readonly string JobCollectionName = "jobs";
     private readonly string JobRunCollectionName = "job_runs";
+    private readonly IMongoClient mongoClient;
+    private readonly IDateTime dateTime;
+    private readonly double jobTimeoutMinutes;
 
-    public async Task<Job?> GetJob(string jobName)
+    public MongoDbStore(IMongoClient mongoClient, IDateTime? dateTime = default, double jobTimeoutMinutes = 30)
+    {
+        this.mongoClient = mongoClient;
+        if (dateTime == default)
+            this.dateTime = new DateTimeService();
+        else
+            this.dateTime = dateTime;
+
+        this.jobTimeoutMinutes = jobTimeoutMinutes;
+    }
+    public async Task<Job?> GetJob(string jobName, CancellationToken cancellationToken)
     {
         var db = mongoClient.GetDatabase(DatabaseName);
         var collection = db.GetCollection<JobContainer>(JobCollectionName);
         return (await collection.AsQueryable().SingleOrDefaultAsync(x => x.Job.Name == jobName))?.Job;
     }
 
-    public async Task<IEnumerable<JobRun>> GetJobRuns(Job job)
+    public async Task<IEnumerable<JobRun>> GetJobRuns(Job job, CancellationToken cancellationToken)
     {
         var db = mongoClient.GetDatabase(DatabaseName);
         var collection = db.GetCollection<JobRunContainer>(JobRunCollectionName);
         return await collection.AsQueryable().Where(x => x.JobRun.JobName == job.Name).Select(x => x.JobRun).OrderByDescending(x => x.Start).ToListAsync();
     }
 
-    public async Task<IEnumerable<Job>> GetJobs()
+    public async Task<IEnumerable<Job>> GetJobs(CancellationToken cancellationToken)
     {
         var db = mongoClient.GetDatabase(DatabaseName);
         var collection = db.GetCollection<JobContainer>(JobCollectionName);
@@ -34,10 +47,10 @@ public class MongoDbStore(IMongoClient mongoClient, IDateTime dateTime) : ICrono
 
     public ICronographLock GetLock()
     {
-        return new MongoDbLock(mongoClient, DatabaseName, dateTime);
+        return new MongoDbLock(mongoClient, DatabaseName, jobTimeoutMinutes, dateTime);
     }
 
-    public async Task UpsertJob(Job job)
+    public async Task UpsertJob(Job job, CancellationToken cancellationToken)
     {
         var db = mongoClient.GetDatabase(DatabaseName);
         var collection = db.GetCollection<JobContainer>(JobCollectionName);
@@ -45,7 +58,7 @@ public class MongoDbStore(IMongoClient mongoClient, IDateTime dateTime) : ICrono
         await collection.UpdateOneAsync(filter => filter.Job.Name == job.Name, update, new UpdateOptions { IsUpsert = true });
     }
 
-    public async Task UpsertJobRun(JobRun jobRun)
+    public async Task UpsertJobRun(JobRun jobRun, CancellationToken cancellationToken)
     {
         var db = mongoClient.GetDatabase(DatabaseName);
         var collection = db.GetCollection<JobRunContainer>(JobRunCollectionName);
