@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <StaticWebAssetBasePath>cronograph</StaticWebAssetBasePath>
     <!-- Enable DeployOnBuild in development -->
-    <DeployOnBuild>true</DeployOnBuild>
+    <!--<DeployOnBuild>true</DeployOnBuild>-->
   </PropertyGroup>
 
   <ItemGroup>
