@@ -9,14 +9,14 @@ public record JobTask(Job Job, Task Task);
 public record Job
 {
     public Job() { }
-    public Job(string name, string className, TimingTypes timingType, string cronString, TimeSpan timeSpan, int timeZone, bool isSingleton)
+    public Job(string name, string className, TimingTypes timingType, string cronString, TimeSpan timeSpan, string timeZoneId, bool isSingleton)
     {
         Name = name;
         ClassName = className;
         TimingType = timingType;
         CronString = cronString;
         TimeSpan = timeSpan;
-        TimeZone = timeZone;
+        TimeZoneId = timeZoneId;
         IsSingleton = isSingleton;
         NextJobRunTime = DateTimeOffset.MinValue;
         OneShot = false;
@@ -30,7 +30,7 @@ public record Job
     public TimingTypes TimingType { get; set; }
     public string CronString { get; set; }
     public TimeSpan TimeSpan { get; set; }
-    public int TimeZone { get; set; }
+    public string TimeZoneId { get; set; }
     public bool IsSingleton { get; set; }
     public DateTimeOffset NextJobRunTime { get; set; }
     public bool OneShot { get; set; }

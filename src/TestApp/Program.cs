@@ -3,12 +3,13 @@ using Cronograph.MongoDb;
 using Cronograph.Shared;
 using Cronograph.UI;
 using MongoDB.Driver;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // builder.Services.AddCronograph(builder.Configuration);
 builder.Services.AddCronograph(builder.Configuration
-    , c =>
+    , storeFactory: c =>
     {
         var mongoUrl = new MongoUrl("mongodb://localhost:27017");
         var mongoClientSettings = MongoClientSettings.FromUrl(mongoUrl);
@@ -38,6 +39,8 @@ var cronograph = app.Services.GetRequiredService<ICronograph>();
 //}, "*/22 * * * * *", isSingleton: true);
 
 await cronograph.AddScheduledService<MySingletonService>("Test service", TimeSpan.FromSeconds(new Random().NextInt64(10,30)), isSingleton: true);
+var timeZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
+await cronograph.AddJob("Test time zone", (c) => { return Task.CompletedTask; }, "0 6 * * 2-6", timeZone);
 app.MapGet("/", () => AppDomain.CurrentDomain.FriendlyName);
 app.UseCronographUI();
 app.Run();

@@ -77,7 +77,10 @@ public class Cronograph : BackgroundService, ICronograph
     private DateTimeOffset GetNextOccurrence(Job job)
     {
         if (job.TimingType == TimingTypes.Cron)
-            return job.CronString.ToCron().GetNextOccurrence(dateTime.UtcNow, TimeZoneInfo.Utc) ?? DateTimeOffset.MinValue;
+        {
+            var timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(job.TimeZoneId);
+            return job.CronString.ToCron().GetNextOccurrence(dateTime.UtcNow, timeZoneInfo) ?? DateTimeOffset.MinValue;
+        }
         else
             return dateTime.UtcNow.Add(job.TimeSpan);
     }
@@ -87,7 +90,7 @@ public class Cronograph : BackgroundService, ICronograph
         if (usedTimeZone == default)
             usedTimeZone = TimeZoneInfo.Utc;
 
-        return new Job(name, className, TimingTypes.Cron, cron, TimeSpan.Zero, usedTimeZone.BaseUtcOffset.Minutes, isSingleton);
+        return new Job(name, className, TimingTypes.Cron, cron, TimeSpan.Zero, usedTimeZone.Id, isSingleton);
     }
     Job CreateJob(string name, string className, TimeSpan timeSpan, TimeZoneInfo? timeZone, bool isSingleton)
     {
@@ -95,7 +98,7 @@ public class Cronograph : BackgroundService, ICronograph
         if (usedTimeZone == default)
             usedTimeZone = TimeZoneInfo.Utc;
 
-        return new Job(name, className, TimingTypes.TimeSpan, String.Empty, timeSpan, usedTimeZone.BaseUtcOffset.Minutes, isSingleton);
+        return new Job(name, className, TimingTypes.TimeSpan, String.Empty, timeSpan, usedTimeZone.Id, isSingleton);
     }
     JobFunction CreateJobFunction(string jobName, Func<CancellationToken, Task> call, CronExpression cronExpression) => 
         new JobFunction(jobName, call, TimingTypes.Cron, cronExpression, TimeSpan.Zero);
