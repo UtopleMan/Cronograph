@@ -2,7 +2,9 @@
 using Microsoft.Extensions.FileProviders;
 using MimeTypes;
 using System.Reflection;
+using System.Text;
 using System.Text.Json.Serialization;
+using System.Text.Unicode;
 
 namespace Cronograph.UI;
 public static class Extensions
@@ -24,7 +26,8 @@ public static class Extensions
     {
         var endpointBuilder = (IEndpointRouteBuilder)app;
         var manifestEmbeddedProvider = new ManifestEmbeddedFileProvider(Assembly.GetExecutingAssembly());
-        MapFiles(physicalDir, subPath, manifestEmbeddedProvider, app);
+        List<string> content = [];
+        MapFiles(physicalDir, subPath, manifestEmbeddedProvider, app, content);
 
 
         endpointBuilder.MapGet(subPath + "/jobs", async (ICronographStore store, CancellationToken cancellationToken) => await store.GetJobs(cancellationToken));
@@ -57,7 +60,14 @@ public static class Extensions
         });
         endpointBuilder.Map(subPath + "/{**:nonfile}", async cnt =>
         {
-            var index = manifestEmbeddedProvider.GetDirectoryContents(physicalDir).Single(x => x.Name.Contains("index.html"));
+            var index = manifestEmbeddedProvider.GetDirectoryContents(physicalDir).SingleOrDefault(x => x.Name.Contains("index.html"));
+            if (index == null)
+            {
+                var directory = manifestEmbeddedProvider.GetDirectoryContents(physicalDir);
+                cnt.Response.Body.Write(UTF8Encoding.UTF8.GetBytes($"<html><body>couldn't find index.html. physicalDir is {physicalDir}. " +
+                    $"Content is:<br/>{content.Aggregate((c, n) => c + "<br/>" + n)}</body></html>"));
+                return;
+            }
             await ReadFile(cnt.Response, index, $"{subPath}/index.html");
         });
         return app;
@@ -72,19 +82,19 @@ public static class Extensions
         return MimeTypeMap.GetMimeType(ext);
     }
 
-    static void MapFiles(string dirName, string subPath, IFileProvider provider, IApplicationBuilder appBuilder)
+    static void MapFiles(string dirName, string subPath, IFileProvider provider, IApplicationBuilder appBuilder, List<string> content)
     {
         var folder = provider.GetDirectoryContents(dirName);
         foreach (var item in folder)
         {
             if (item.IsDirectory)
             {
-                MapFiles(dirName + "/" + item.Name, subPath, provider, appBuilder);
+                MapFiles(dirName + "/" + item.Name, subPath, provider, appBuilder, content);
                 continue;
             }
             string map = (dirName + "/" + item.Name);
             map = ("/" + map).Replace($"{physicalDir}/", "");
-
+            content.Add("/" + subPath + map);
             appBuilder.Map("/" + subPath + map, app =>
             {
                 var file = item;
