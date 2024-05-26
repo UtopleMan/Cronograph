@@ -5,6 +5,7 @@ public enum TimingTypes
     TimeSpan
 }
 
+public record JobTask(Job Job, Task Task);
 public record Job
 {
     public Job() { }

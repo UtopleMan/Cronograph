@@ -6,8 +6,7 @@ using Microsoft.Extensions.Hosting;
 using MongoDB.Driver;
 
 var builder = Host.CreateApplicationBuilder();
-builder.Services.AddCronograph(builder.Configuration
-    , c =>
+builder.Services.AddCronograph(builder.Configuration, storeFactory: c =>
     {
         var mongoUrl = new MongoUrl("mongodb://localhost:27017");
         var mongoClientSettings = MongoClientSettings.FromUrl(mongoUrl);
@@ -20,20 +19,3 @@ var app = builder.Build();
 var cronograph = app.Services.GetRequiredService<ICronograph>();
 await cronograph.AddScheduledService<MySingletonService>("Test service", TimeSpan.FromSeconds(10), isSingleton: true);
 app.Run();
-
-public class MySingletonService : IScheduledService
-{
-    public async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        Console.WriteLine("Scheduled service started");
-
-        for (int i = 0; i < 10; i++)
-        {
-            if (stoppingToken.IsCancellationRequested)
-                break;
-            Console.WriteLine(i);
-            await Task.Delay(1000, stoppingToken);
-        }
-        Console.WriteLine("Scheduled service finished");
-    }
-}

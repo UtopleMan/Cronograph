@@ -1,9 +1,10 @@
 ﻿using Cronograph.Shared;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
 
 namespace Cronograph;
-internal class InMemCronographStore(IConfiguration configuration) : ICronographStore
+internal class InMemCronographStore(IOptions<CronographSettings> settings) : ICronographStore
 {
     private ConcurrentDictionary<string, Job> jobs = new();
     private ConcurrentDictionary<string, JobRun> jobRuns = new();
@@ -17,7 +18,7 @@ internal class InMemCronographStore(IConfiguration configuration) : ICronographS
     public Task UpsertJobRun(JobRun jobRun, CancellationToken cancellationToken)
     {
         jobRuns.AddOrUpdate(jobRun.Id, jobRun, (name, oldJob) => jobRun);
-        var count = configuration.GetValue<int>("Cronograph:MaxJobRuns");
+        var count = settings.Value.MaxStoredJobRuns;
         if (count < 1) count = 1;
         if (jobRuns.Count > count) 
         {

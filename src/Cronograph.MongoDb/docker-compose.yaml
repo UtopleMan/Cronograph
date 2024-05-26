@@ -1,0 +1,12 @@
+name: "cronograph"
+services:
+  mongo:
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    volumes:
+      - "mongodata:/mongo-data/db"
+    restart: always
+
+volumes:
+  mongodata:
