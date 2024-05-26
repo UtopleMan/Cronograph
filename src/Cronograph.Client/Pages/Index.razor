@@ -112,7 +112,7 @@
             return timeSpan.Minutes + "m " + timeSpan.Seconds + "s";
         if (timeSpan < TimeSpan.FromDays(1))
             return timeSpan.Hours + "h " + timeSpan.Minutes + "m";
-        return timeSpan.Days + "days";
+        return timeSpan.Days + "d " + timeSpan.Hours + "h";
     }
     private async Task OpenMessageBox()
     {
