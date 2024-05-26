@@ -60,15 +60,25 @@ public static class Extensions
         });
         endpointBuilder.Map(subPath + "/{**:nonfile}", async cnt =>
         {
-            var index = manifestEmbeddedProvider.GetDirectoryContents(physicalDir).SingleOrDefault(x => x.Name.Contains("index.html"));
-            if (index == null)
+            if (cnt.Request.Path.ToString().EndsWith(subPath) || cnt.Request.Path.ToString().EndsWith(subPath + "/") || cnt.Request.Path.ToString().EndsWith(subPath + "/index.html"))
+            {
+                var index = manifestEmbeddedProvider.GetDirectoryContents(physicalDir).SingleOrDefault(x => x.Name.Contains("index.html"));
+                if (index == null)
+                {
+                    var directory = manifestEmbeddedProvider.GetDirectoryContents(physicalDir);
+                    await cnt.Response.BodyWriter.WriteAsync(UTF8Encoding.UTF8.GetBytes($"<html><body>couldn't find {cnt.Request.Path}. physicalDir is {physicalDir}. " +
+                        $"Content is:<br/>{content.Aggregate((c, n) => c + "<br/>" + n)}</body></html>"));
+                    return;
+                }
+                await ReadFile(cnt.Response, index, $"{subPath}/index.html");
+            }
+            else
             {
                 var directory = manifestEmbeddedProvider.GetDirectoryContents(physicalDir);
-                cnt.Response.Body.Write(UTF8Encoding.UTF8.GetBytes($"<html><body>couldn't find {cnt.Request.Path}. physicalDir is {physicalDir}. " +
+                await cnt.Response.BodyWriter.WriteAsync(UTF8Encoding.UTF8.GetBytes($"<html><body>couldn't find {cnt.Request.Path}. physicalDir is {physicalDir}. " +
                     $"Content is:<br/>{content.Aggregate((c, n) => c + "<br/>" + n)}</body></html>"));
                 return;
             }
-            await ReadFile(cnt.Response, index, $"{subPath}/index.html");
         });
         return app;
     }
