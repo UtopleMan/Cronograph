@@ -3,7 +3,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Cronograph.Shared;
-using MassTransit;
 using Microsoft.Extensions.Options;
 
 namespace Cronograph;
@@ -275,7 +274,7 @@ public class Cronograph : BackgroundService, ICronograph
     }
     string GetId()
     {
-        return NewId.Next().ToString("N");
+        return GlobalId.Next();
     }
     async Task<IEnumerable<Job>> GetJobsReadyToRun(CancellationToken cancellationToken)
     {
