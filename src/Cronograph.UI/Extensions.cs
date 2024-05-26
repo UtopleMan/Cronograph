@@ -64,7 +64,7 @@ public static class Extensions
             if (index == null)
             {
                 var directory = manifestEmbeddedProvider.GetDirectoryContents(physicalDir);
-                cnt.Response.Body.Write(UTF8Encoding.UTF8.GetBytes($"<html><body>couldn't find index.html. physicalDir is {physicalDir}. " +
+                cnt.Response.Body.Write(UTF8Encoding.UTF8.GetBytes($"<html><body>couldn't find {cnt.Request.Path}. physicalDir is {physicalDir}. " +
                     $"Content is:<br/>{content.Aggregate((c, n) => c + "<br/>" + n)}</body></html>"));
                 return;
             }
