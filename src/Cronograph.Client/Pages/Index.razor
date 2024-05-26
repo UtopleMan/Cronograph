@@ -148,37 +148,37 @@
     }
     private async Task<GridDataProviderResult<Job>> GetGridData(GridDataProviderRequest<Job> request)
     {
-        var list = await Http.GetFromJsonAsync<Job[]>("/cronograph/jobs");
+        var list = await Http.GetFromJsonAsync<Job[]>("/cronograph/jobs", JsonOptions.Options);
         if (list != null && filter != null && filter.Length > 0)
             list = list.Where(x => x.Name.ToLower().Contains(filter.ToLower())).ToArray();
         return request.ApplyTo(list);
     }
     protected async Task Stop(Job job)
     {
-        await Http.PostAsJsonAsync("/cronograph/jobs/stop", new JobName { Name = job.Name });
+        await Http.PostAsJsonAsync("/cronograph/jobs/stop", new JobName { Name = job.Name }, JsonOptions.Options);
     }
     protected async Task Stop(HashSet<Job> jobs)
     {
         foreach (var job in jobs)
-            await Http.PostAsJsonAsync("/cronograph/jobs/stop", new JobName { Name = job.Name });
+            await Http.PostAsJsonAsync("/cronograph/jobs/stop", new JobName { Name = job.Name }, JsonOptions.Options);
     }
     protected async Task Start(Job job)
     {
-        await Http.PostAsJsonAsync("/cronograph/jobs/start", new JobName { Name = job.Name });
+        await Http.PostAsJsonAsync("/cronograph/jobs/start", new JobName { Name = job.Name }, JsonOptions.Options);
     }
     protected async Task Start(HashSet<Job> jobs)
     {
         foreach (var job in jobs)
-            await Http.PostAsJsonAsync("/cronograph/jobs/start", new JobName { Name = job.Name });
+            await Http.PostAsJsonAsync("/cronograph/jobs/start", new JobName { Name = job.Name }, JsonOptions.Options);
     }
     protected async Task Execute(Job job)
     {
-        await Http.PostAsJsonAsync("/cronograph/jobs/execute", new JobName { Name = job.Name });
+        await Http.PostAsJsonAsync("/cronograph/jobs/execute", new JobName { Name = job.Name }, JsonOptions.Options);
     }
     protected async Task Execute(HashSet<Job> jobs)
     {
         foreach (var job in jobs)
-            await Http.PostAsJsonAsync("/cronograph/jobs/execute", new JobName { Name = job.Name });
+            await Http.PostAsJsonAsync("/cronograph/jobs/execute", new JobName { Name = job.Name }, JsonOptions.Options);
     }
     public void Dispose() => Dispose(true);
 

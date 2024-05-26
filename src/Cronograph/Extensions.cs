@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Cronograph.Shared;
 using Microsoft.Extensions.Options;
+using System.Reflection;
 
 namespace Cronograph;
 

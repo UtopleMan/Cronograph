@@ -2,17 +2,30 @@
 using Microsoft.Extensions.FileProviders;
 using MimeTypes;
 using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace Cronograph.UI;
 public static class Extensions
 {
     private const string physicalDir = "wwwroot\\cronograph";
-    public static IApplicationBuilder UseCronographUI(this IApplicationBuilder applicationBuilder, string subPath = "cronograph")
+    public static IServiceCollection AddCronographUI(this IServiceCollection services)
     {
-        var cancellationTokenSource = new CancellationTokenSource();
-        var endpointBuilder = (IEndpointRouteBuilder)applicationBuilder;
+        services.ConfigureHttpJsonOptions(options =>
+        {
+            options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        });
+        services.Configure<Microsoft.AspNetCore.Mvc.JsonOptions>(options =>
+        {
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        });
+        return services;
+    }
+    public static WebApplication UseCronographUI(this WebApplication app, string subPath = "cronograph")
+    {
+        var endpointBuilder = (IEndpointRouteBuilder)app;
         var manifestEmbeddedProvider = new ManifestEmbeddedFileProvider(Assembly.GetExecutingAssembly());
-        MapFiles(physicalDir, subPath, manifestEmbeddedProvider, applicationBuilder);
+        MapFiles(physicalDir, subPath, manifestEmbeddedProvider, app);
+
 
         endpointBuilder.MapGet(subPath + "/jobs", async (ICronographStore store, CancellationToken cancellationToken) => await store.GetJobs(cancellationToken));
         endpointBuilder.MapPost(subPath + "/jobs/execute", async (HttpRequest request, IDateTime dateTime, ICronographStore store, CancellationToken cancellationToken) =>
@@ -47,7 +60,7 @@ public static class Extensions
             var index = manifestEmbeddedProvider.GetDirectoryContents(physicalDir).Single(x => x.Name.Contains("index.html"));
             await ReadFile(cnt.Response, index, $"{subPath}/index.html");
         });
-        return applicationBuilder;
+        return app;
     }
     static string GetContentType(string file)
     {
