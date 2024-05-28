@@ -3,9 +3,6 @@ using Cronograph.MongoDb;
 using Cronograph.Shared;
 using Cronograph.UI;
 using MongoDB.Driver;
-using System;
-using Microsoft.Extensions.DependencyInjection;
-using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 

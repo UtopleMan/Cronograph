@@ -8,16 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Cronograph" Version="1.0.64" />
+    <PackageReference Include="Cronograph.MongoDb" Version="1.0.64" />
+    <PackageReference Include="Cronograph.UI" Version="1.0.64" />
     <PackageReference Include="MongoDB.Driver" Version="2.25.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.6.2" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.6.2" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.6.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Cronograph.MongoDb\Cronograph.MongoDb.csproj" />
-    <ProjectReference Include="..\Cronograph.UI\Cronograph.UI.csproj" />
-    <ProjectReference Include="..\Cronograph\Cronograph.csproj" />
   </ItemGroup>
 
 </Project>

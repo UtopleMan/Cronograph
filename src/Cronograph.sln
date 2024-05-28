@@ -17,10 +17,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cronograph.MongoDb", "Crono
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{1B9D6734-3B88-42C2-9621-D8C023EA1D4E}"
 	ProjectSection(SolutionItems) = preProject
+		..\build.cmd = ..\build.cmd
 		..\.github\workflows\build.yaml = ..\.github\workflows\build.yaml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestConsoleApp", "TestConsoleApp\TestConsoleApp.csproj", "{7D29F02D-0834-4B80-AC58-065F4A877C48}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestConsoleApp", "TestConsoleApp\TestConsoleApp.csproj", "{7D29F02D-0834-4B80-AC58-065F4A877C48}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

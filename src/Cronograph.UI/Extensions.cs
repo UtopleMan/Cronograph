@@ -60,6 +60,7 @@ public static class Extensions
         });
         endpointBuilder.Map(subPath + "/{**:nonfile}", async cnt =>
         {
+            Console.WriteLine(cnt.Request.Path.ToString());
             if (cnt.Request.Path.ToString().EndsWith(subPath) || cnt.Request.Path.ToString().EndsWith(subPath + "/") || cnt.Request.Path.ToString().EndsWith(subPath + "/index.html"))
             {
                 var index = manifestEmbeddedProvider.GetDirectoryContents(physicalDir).SingleOrDefault(x => x.Name.Contains("index.html"));

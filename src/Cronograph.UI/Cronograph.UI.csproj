@@ -42,6 +42,11 @@
   </ItemGroup>
   
   <ItemGroup>
+    <EmbeddedResource Remove="..\blazor\web.config" />
+    <EmbeddedResource Remove="..\Cronograph.Client\obj\Debug\net8.0\browser-wasm\PubTmp\Out\web.config" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <None Include="../../README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
