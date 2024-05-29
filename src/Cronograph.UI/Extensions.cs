@@ -1,10 +1,8 @@
 ﻿using Cronograph.Shared;
 using Microsoft.Extensions.FileProviders;
 using MimeTypes;
-using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
-using System.Text.Unicode;
 
 namespace Cronograph.UI;
 public static class Extensions
@@ -25,7 +23,7 @@ public static class Extensions
     public static WebApplication UseCronographUI(this WebApplication app, string subPath = "cronograph")
     {
         var endpointBuilder = (IEndpointRouteBuilder)app;
-        var manifestEmbeddedProvider = new ManifestEmbeddedFileProvider(Assembly.GetExecutingAssembly());
+        var manifestEmbeddedProvider = new ManifestEmbeddedFileProvider(typeof(Extensions).Assembly);
         List<string> content = [];
         MapFiles(physicalDir, subPath, manifestEmbeddedProvider, app, content);
 
