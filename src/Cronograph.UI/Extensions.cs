@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 namespace Cronograph.UI;
 public static class Extensions
 {
-    private const string physicalDir = "wwwroot\\cronograph";
+    static string physicalDir = string.Empty;
     public static IServiceCollection AddCronographUI(this IServiceCollection services)
     {
         services.ConfigureHttpJsonOptions(options =>
@@ -25,6 +25,7 @@ public static class Extensions
         var endpointBuilder = (IEndpointRouteBuilder)app;
         var manifestEmbeddedProvider = new ManifestEmbeddedFileProvider(typeof(Extensions).Assembly);
         List<string> content = [];
+        physicalDir = Path.Combine("wwwroot", "cronograph") + Path.DirectorySeparatorChar;
         MapFiles(physicalDir, subPath, manifestEmbeddedProvider, app, content);
 
 
@@ -58,8 +59,8 @@ public static class Extensions
         });
         endpointBuilder.Map(subPath + "/{**:nonfile}", async cnt =>
         {
-            Console.WriteLine(cnt.Request.Path.ToString());
-            if (cnt.Request.Path.ToString().EndsWith(subPath) || cnt.Request.Path.ToString().EndsWith(subPath + "/") || cnt.Request.Path.ToString().EndsWith(subPath + "/index.html"))
+            if (cnt.Request.Path.ToString().EndsWith(subPath) || cnt.Request.Path.ToString().EndsWith(subPath + "/") || 
+                cnt.Request.Path.ToString().EndsWith(subPath + "/index.html"))
             {
                 var index = manifestEmbeddedProvider.GetDirectoryContents(physicalDir).SingleOrDefault(x => x.Name.Contains("index.html"));
                 if (index == null)
@@ -98,13 +99,13 @@ public static class Extensions
         {
             if (item.IsDirectory)
             {
-                MapFiles(dirName + "/" + item.Name, subPath, provider, appBuilder, content);
+                MapFiles(Path.Combine(dirName, item.Name), subPath, provider, appBuilder, content);
                 continue;
             }
-            string map = (dirName + "/" + item.Name);
-            map = ("/" + map).Replace($"{physicalDir}/", "");
-            content.Add("/" + subPath + map);
-            appBuilder.Map("/" + subPath + map, app =>
+            string map = Path.Combine(dirName, item.Name);
+            map = map.Replace($"{physicalDir}", "");
+            content.Add(ToWebPath(Path.Combine(subPath, map)));
+            appBuilder.Map(ToWebPath(Path.Combine(subPath, map)), app =>
             {
                 var file = item;
                 app.Run(async cnt =>
@@ -113,6 +114,14 @@ public static class Extensions
                 });
             });
         }
+    }
+    static string WebDirectorySeperator = "/";
+    static string WindowsDirectorySeperator = "\\";
+    static string ToWebPath(string path)
+    {
+        if (string.IsNullOrEmpty(path)) return WebDirectorySeperator;
+        if (!path.StartsWith(WebDirectorySeperator) && !path.StartsWith(WindowsDirectorySeperator)) path = WebDirectorySeperator + path;
+        return path.Replace(WindowsDirectorySeperator, WebDirectorySeperator);
     }
     static async Task ReadFile(HttpResponse response, IFileInfo file, string path)
     {
@@ -132,4 +141,6 @@ public static class Extensions
         var result = stream.ToArray();
         await response.BodyWriter.WriteAsync(new Memory<byte>(result));
     }
+
+
 }
