@@ -14,7 +14,8 @@ public class Cronograph : BackgroundService, ICronograph
     private readonly CronographMemoryCache cache;
     private readonly IOptions<CronographSettings> settings;
     private readonly ServiceProvider provider;
-    Dictionary<string, JobTask> runningTasks = [];
+    // Dictionary<string, JobTask> runningTasks = [];
+    List<JobTask> runningTasks = [];
 
     public Cronograph(IDateTime dateTime, ICronographStore store, IServiceCollection services, ILogger<Cronograph> logger, 
         CronographMemoryCache cache, IOptions<CronographSettings> settings)
@@ -150,18 +151,18 @@ public class Cronograph : BackgroundService, ICronograph
     private async Task StopRunningTasks(CancellationTokenSource cancellationTokenSource)
     {
         cancellationTokenSource.Cancel();
-        foreach (var stoppedTask in runningTasks.Where(x => x.Value.Task.IsCompleted || x.Value.Task.IsCanceled || x.Value.Task.IsFaulted || x.Value.Task.IsCompletedSuccessfully))
-            runningTasks.Remove(stoppedTask.Key);
+        foreach (var stoppedTask in runningTasks.Where(x => x.Task.IsCompleted || x.Task.IsCanceled || x.Task.IsFaulted || x.Task.IsCompletedSuccessfully))
+            runningTasks.Remove(stoppedTask);
         if (runningTasks.Any())
             logger.LogInformation("Waiting for jobs to finish before shutting down..");
-        Task.WaitAll(runningTasks.Values.Select(x => x.Task).ToArray(), settings.Value.ShutdownTimeoutMs);
+        Task.WaitAll(runningTasks.Select(x => x.Task).ToArray(), settings.Value.ShutdownTimeoutMs);
 
-        foreach (var stillRunningTask in runningTasks.Where(x => !x.Value.Task.IsCompleted || !x.Value.Task.IsCanceled || !x.Value.Task.IsFaulted || !x.Value.Task.IsCompletedSuccessfully))
+        foreach (var stillRunningTask in runningTasks.Where(x => !x.Task.IsCompleted || !x.Task.IsCanceled || !x.Task.IsFaulted || !x.Task.IsCompletedSuccessfully))
         {
-            if (stillRunningTask.Value.Job.IsSingleton)
+            if (stillRunningTask.Job.IsSingleton)
             {
                 var jobLock = store.GetLock();
-                await jobLock.Unlock(stillRunningTask.Value.Job);
+                await jobLock.Unlock(stillRunningTask.Job);
             }
         }
     }
@@ -227,9 +228,9 @@ public class Cronograph : BackgroundService, ICronograph
     }
     private void AddRunningTask(Job job, Task task)
     {
-        runningTasks.Add(job.Name, new JobTask(job, task));
-        foreach (var stoppedTask in runningTasks.Where(x => x.Value.Task.IsCompleted || x.Value.Task.IsCanceled || x.Value.Task.IsFaulted || x.Value.Task.IsCompletedSuccessfully).ToList())
-            runningTasks.Remove(stoppedTask.Key);
+        runningTasks.Add(new JobTask(job, task));
+        foreach (var stoppedTask in runningTasks.Where(x => x.Task.IsCompleted || x.Task.IsCanceled || x.Task.IsFaulted || x.Task.IsCompletedSuccessfully).ToList())
+            runningTasks.Remove(stoppedTask);
     }
 
     async Task RunAction(Job job, CancellationToken stoppingToken)
