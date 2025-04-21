@@ -52,9 +52,7 @@
   </ItemGroup>
 
   <ItemGroup>
-			<ProjectReference Include="..\Cronograph.Shared\Cronograph.Shared.csproj">
-					<PrivateAssets>All</PrivateAssets>
-			</ProjectReference>
+			<ProjectReference Include="..\Cronograph.Shared\Cronograph.Shared.csproj"/>
 			<ProjectReference Include="..\Cronograph.Client\Cronograph.Client.csproj">
 					<PrivateAssets>All</PrivateAssets>
 			</ProjectReference>
