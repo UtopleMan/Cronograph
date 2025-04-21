@@ -1,18 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <StaticWebAssetBasePath>cronograph</StaticWebAssetBasePath>
-    <!-- Enable DeployOnBuild in development -->
-    <!--<DeployOnBuild>true</DeployOnBuild>-->
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Havit.Blazor.Components.Web.Bootstrap" Version="4.6.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.*-*" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.*-*" PrivateAssets="all" />
+    <PackageReference Include="Havit.Blazor.Components.Web.Bootstrap" Version="4.8.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.4" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,5 +20,9 @@
   <ItemGroup>
     <Folder Include="wwwroot\icons\" />
   </ItemGroup>
+
+  <Target Name="RunPublishInVS" Condition=" '$(BuildingInsideVisualStudio)' == 'true' " AfterTargets="Build">
+    <Exec Command="dotnet publish --configuration Debug --output ../blazor --no-build --no-dependencies --no-restore" />
+  </Target>
 
 </Project>

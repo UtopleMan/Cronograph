@@ -40,9 +40,9 @@
 
         <HxGridColumn HeaderText="Cron" ItemTextSelector="x => RenderCron(x)" />
         <HxGridColumn HeaderText="Next Run" ItemTextSelector="@(x => RenderTimeDifference(x.NextJobRunTime))" />
-        <HxGridColumn HeaderText="Next Run Time" ItemTextSelector="@(x => RenderTime(x.NextJobRunTime))" />
+        <HxGridColumn HeaderText="Next Run Time" SortKeySelector="@(x => x.NextJobRunTime)" ItemTextSelector="@(x => RenderTime(x.NextJobRunTime))" />
         <HxGridColumn HeaderText="Last State" ItemTextSelector="x => x.LastJobRunState.ToString()" />
-        <HxGridColumn HeaderText="Last Run Time" ItemTextSelector="@(x => RenderTime(x.LastJobRunTime))" />
+        <HxGridColumn HeaderText="Last Run Time" SortKeySelector="@(x => x.LastJobRunTime)" ItemTextSelector="@(x => RenderTime(x.LastJobRunTime))" />
         <HxGridColumn HeaderText="Last Message" ItemTextSelector="x => x.LastJobRunMessage" />
         <HxGridColumn>
             <ItemTemplate Context="job">
@@ -50,25 +50,31 @@
                     <HxButton Icon="BootstrapIcon.PlayCircle" Enabled="job.State != JobStates.Running" OnClick="async () => await Execute(job)" Color="ThemeColor.Primary" style="margin-right:5px" />
                     <HxButton Icon="BootstrapIcon.Calendar" Enabled="job.State == JobStates.Stopped" OnClick="async () => await Start(job)" Color="ThemeColor.Secondary" style="margin-right:5px" />
                     <HxButton Icon="BootstrapIcon.StopCircle" Enabled="job.State != JobStates.Stopped" OnClick="async () => await Stop(job)" Color="ThemeColor.Danger" />
+                    <HxButton Icon="BootstrapIcon.Terminal" Enabled="job.State != JobStates.Stopped" OnClick="() => selectedLine = job" Color="ThemeColor.Secondary" />
                 </div>
             </ItemTemplate>
         </HxGridColumn>
     </Columns>
 </HxGrid>
-
 <p>
     <HxButton Icon="BootstrapIcon.PlayCircle" Text="Run now" Enabled="selectedJobs.Any()" OnClick="async () => await Execute(selectedJobs)" Color="ThemeColor.Primary" />
     <HxButton Icon="BootstrapIcon.Calendar" Text="Schedule" Enabled="selectedJobs.Any()" OnClick="async () => await Start(selectedJobs)" Color="ThemeColor.Secondary" />
     <HxButton Icon="BootstrapIcon.StopCircle" Text="Stop" Enabled="selectedJobs.Any()" OnClick="async () => await Stop(selectedJobs)" Color="ThemeColor.Danger" />
 </p>
+<HxInputTextArea @ref="console" @bind-Value="consoleText" 
+    style="overflow-x: initial; overflow-y: initial; background-color: darkblue; color: white; font-family: monospace; font-weight: bold; width: 99%; height: 600px; min-height: 100%; max-height: 100%; padding: 20px;" />
+
 @code {
-    private Timer timer;
-    private bool disposed = false;
-    private string filter = "";
-    private string time = "";
-    private HxGrid<Job> grid;
-    private HashSet<Job> selectedJobs = new();
-    private int PageSize = 16;
+    Timer timer;
+    bool disposed = false;
+    string filter = "";
+    string time = "";
+    HxInputTextArea console;
+    string consoleText = "";
+    HxGrid<Job> grid;
+    HashSet<Job> selectedJobs = new();
+    Job selectedLine;
+    int PageSize = 16;
     [Inject]
     HttpClient Http { get; set; }
     [Inject] 
@@ -123,10 +129,10 @@
     {
         var confirmResult = await MessageBox.ConfirmAsync("Confirm", "Do you really want to ...?");
     }
-    void UpdateTime()
+    async Task UpdateTime()
     {
         time = DateTime.UtcNow.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss");
-        InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged);
     }
     void LocationChanged(object sender, LocationChangedEventArgs e)
     {
@@ -143,8 +149,13 @@
     }
     private async Task UpdateView()
     {
-        await grid.RefreshDataAsync();
         UpdateTime();
+        await grid.RefreshDataAsync();
+
+        if (selectedLine == null) return;
+        var log = await Http.GetFromJsonAsync<LogLine[]>($"/cronograph/logs/{selectedLine.Name}", JsonOptions.Options);
+        if (!log.Any()) return;
+        consoleText = log.Select(x => x.content).Aggregate((c, n) => c + "\r\n" + n);
     }
     private async Task<GridDataProviderResult<Job>> GetGridData(GridDataProviderRequest<Job> request)
     {

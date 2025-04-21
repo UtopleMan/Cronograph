@@ -21,5 +21,5 @@ var cronograph = app.Services.GetRequiredService<ICronograph>();
 await cronograph.AddScheduledService<MySingletonService>("Test service", TimeSpan.FromSeconds(10), isSingleton: true);
 
 var timeZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
-await cronograph.AddJob("Test time zone", (c) => { return Task.CompletedTask; }, "0 6 * * 2-6", timeZone);
+await cronograph.AddJob("Test time zone", (_, c) => { return Task.CompletedTask; }, "0 6 * * 2-6", timeZone);
 app.Run();

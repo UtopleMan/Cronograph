@@ -1,8 +1,9 @@
 ﻿using Cronograph.Shared;
+using Microsoft.Extensions.Logging;
 
 public class MySingletonService : IScheduledService
 {
-    public async Task ExecuteAsync(CancellationToken stoppingToken)
+    public async Task ExecuteAsync(ILogger logger, CancellationToken stoppingToken)
     {
         Console.WriteLine("Scheduled service started");
 

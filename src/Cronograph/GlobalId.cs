@@ -1,13 +1,19 @@
 ﻿using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Numerics;
+using System.Text;
 
 namespace Cronograph;
-
+public enum IdResolution
+{
+    Digits16,
+    Digits32,
+    Digits64
+}
 public class GlobalId
 {
-    private static int __staticIncrement = new Random().Next();
-    private static readonly ulong __random = CalculateNetworkProcessValue();
+    static int staticIncrement = new Random().Next();
+    static readonly ulong random = CalculateNetworkProcessValue();
     static ulong GetNetworkAddress(int index = 0)
     {
         var network = NetworkInterface
@@ -29,41 +35,47 @@ public class GlobalId
 
         return (ulong)network[5] << 40 | (ulong)network[4] << 32 | (ulong)network[3] << 24 | (ulong)network[2] << 16 | (ulong)network[1] << 8 | (ulong)network[0];
     }
+    static uint GenerateMachineIdBytes()
+    {
+        long machineId = 0;
+        var machineName = Environment.GetEnvironmentVariable("COMPUTERNAME");
+        if (String.IsNullOrEmpty(machineName))
+            machineName = Environment.GetEnvironmentVariable("HOSTNAME");
+        if (String.IsNullOrEmpty(machineName))
+            machineName = System.Net.Dns.GetHostName();
+        if (!String.IsNullOrEmpty(machineName))
+        {
+            using var md5 = System.Security.Cryptography.MD5.Create();
+            machineId = md5.ComputeHash(UTF8Encoding.UTF8.GetBytes(machineName)).Sum((b) => (long)b);
+        }
+        return (uint) machineId;
+    }
+
     static int GetProcess() => Process.GetCurrentProcess().Id;
     static ulong CalculateNetworkProcessValue()
     {
         Random random = new Random();
-        int num = GetProcess();
+        int num1 = GetProcess();
         ulong num2 = GetNetworkAddress();
-        return (ulong)((((ulong)(uint)num << 32) | (ulong)num2) & 0xFFFFFFFFFL);
+        uint num3 = GenerateMachineIdBytes();
+        return (ulong)((((ulong)((uint)num1 + num3) << 32) | (ulong)num2) & 0xFFFFFFFFFL);
     }
-    static long CalculateRandomValue()
+    public static string Next(IdResolution resolution = IdResolution.Digits64)
     {
-        Random random = new Random();
-        int num = random.Next();
-        int num2 = random.Next();
-        return (long)((((ulong)(uint)num << 32) | (uint)num2) & 0xFFFFFFFFFFL);
-    }
-    public static string Next()
-    {
-        uint increment = (uint)(Interlocked.Increment(ref __staticIncrement) & 0xFFFFFFL);
-        return Create((ulong)DateTime.UtcNow.Ticks, __random, increment);
-    }
-    public static char[] digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
-        'H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','^','_','a','b','c','d','e','f','g','h','i',
-        'j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
-    public static string Create(ulong timestamp, ulong random, uint increment)
-    {
-        if (random < 0 || random > 1099511627775L)
-        {
-            throw new ArgumentOutOfRangeException("random", "The random value must be between 0 and 1099511627775 (it must fit in 5 bytes).");
-        }
+        uint increment = (uint)(Interlocked.Increment(ref staticIncrement) & 0xFFFFFFL);
 
-        if (increment < 0 || increment > 16777215)
-        {
-            throw new ArgumentOutOfRangeException("increment", "The increment value must be between 0 and 16777215 (it must fit in 3 bytes).");
-        }
+        if (resolution == IdResolution.Digits16)
+            return Create((ulong)DateTime.UtcNow.Ticks, random, increment, 4, 15, ref digits16, resolution);
+        else if (resolution == IdResolution.Digits32)
+            return Create((ulong)DateTime.UtcNow.Ticks, random, increment, 5, 31, ref digits32, resolution);
+        return Create((ulong)DateTime.UtcNow.Ticks, random, increment, 6, 63, ref digits64, resolution);
+    }
+    static string digits64 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ^_abcdefghijklmnopqrstuvwxyz";
+    static string digits32 = "0123456789abcdefghijklmnopqrstuv";
+    static string digits16 = "0123456789abcdef";
 
+    static string Create(ulong timestamp, ulong random, uint increment, int shifter, int ander, ref string digits, IdResolution resolution = IdResolution.Digits64)
+    {
         uint b = (uint)(random >> 8);
         uint c = ((uint)random << 24) | increment;
 
@@ -72,10 +84,10 @@ public class GlobalId
         List<char> resultString = [];
         while (result > 0)
         {
-            var digit = result & 63;
-            result = result >> 6;
+            var digit = result & ander;
+            result = result >> shifter;
             resultString.Add(digits[(short)digit]);
-            if (result < 64)
+            if (result < ander)
             {
                 resultString.Add(digits[(short)result]);
                 return new string(((IEnumerable<char>)resultString).Reverse().ToArray());

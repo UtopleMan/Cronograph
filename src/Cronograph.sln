@@ -8,6 +8,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApp", "TestApp\TestApp.csproj", "{DE7BE91A-E961-48F6-A514-0C1BADEF5908}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cronograph.UI", "Cronograph.UI\Cronograph.UI.csproj", "{1D1FA709-F340-46F1-A8B9-6ADF6C3C5468}"
+	ProjectSection(ProjectDependencies) = postProject
+		{23330D97-F05C-49F2-ABF9-9206983A5D32} = {23330D97-F05C-49F2-ABF9-9206983A5D32}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cronograph.Client", "Cronograph.Client\Cronograph.Client.csproj", "{23330D97-F05C-49F2-ABF9-9206983A5D32}"
 EndProject

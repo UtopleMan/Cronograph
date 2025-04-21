@@ -2,7 +2,7 @@
 
 public class MyService : IScheduledService
 {
-    public async Task ExecuteAsync(CancellationToken stoppingToken)
+    public async Task ExecuteAsync(ILogger logger, CancellationToken stoppingToken)
     {
         Console.WriteLine("Scheduled service boom!");
         await Task.Delay(40000);
@@ -11,15 +11,14 @@ public class MyService : IScheduledService
 
 public class MySingletonService : IScheduledService
 {
-    public async Task ExecuteAsync(CancellationToken stoppingToken)
+    public async Task ExecuteAsync(ILogger logger, CancellationToken stoppingToken)
     {
-        Console.WriteLine("Scheduled service started");
-
+        logger.LogInformation("Scheduled service started");
         for (int i = 0; i < 40; i++)
         {
-            Console.WriteLine(i);
+            logger.LogInformation(i.ToString());
             await Task.Delay(1000);
         }
-        Console.WriteLine("Scheduled service finished");
+        logger.LogInformation("Scheduled service finished");
     }
 }

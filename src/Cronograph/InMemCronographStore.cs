@@ -1,13 +1,15 @@
 ﻿using Cronograph.Shared;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
 
 namespace Cronograph;
-internal class InMemCronographStore(IOptions<CronographSettings> settings) : ICronographStore
+
+internal class InMemCronographStore(IOptions<CronographSettings> settings, IDateTime dateTime) : ICronographStore
 {
     private ConcurrentDictionary<string, Job> jobs = new();
     private ConcurrentDictionary<string, JobRun> jobRuns = new();
+    private ConcurrentDictionary<string, List<LogLine>> jobRunLogs = new();
 
     public Task UpsertJob(Job job, CancellationToken cancellationToken)
     {
@@ -46,7 +48,51 @@ internal class InMemCronographStore(IOptions<CronographSettings> settings) : ICr
     {
         return new InMemCronographLock();
     }
+    public ILogger GetLogger(JobRun jobRun)
+    {
+        return new InMemCronographLogger(this, dateTime, jobRun);
+    }
+    public Task AddLog(LogLine logLine)
+    {
+        List<LogLine> jobRunLog;
+        if (!jobRunLogs.ContainsKey(logLine.JobRunId))
+            jobRunLog = jobRunLogs.AddOrUpdate(logLine.JobRunId, _ => [], (_, _) => []);
+        else
+            jobRunLog = jobRunLogs[logLine.JobRunId];
+        jobRunLog.Add(logLine);
+        return Task.CompletedTask;
+    }
+    public Task<IEnumerable<LogLine>> GetLog(string jobName, int skip = 0, int take = 100, CancellationToken cancellationToken = default)
+    {
+        var job = jobs.Values.Single(x => x.Name == jobName);
+        var run = jobRuns.Values.LastOrDefault(x => x.JobName == job.Name);
+        if (run == null)
+            return Task.FromResult(Enumerable.Empty<LogLine>());
+
+        if (!jobRunLogs.ContainsKey(run.Id))
+            return Task.FromResult(Enumerable.Empty<LogLine>());
+        var jobRunLog = jobRunLogs[run.Id].ToList();
+        jobRunLog.Reverse();
+        return Task.FromResult(jobRunLog.Skip(skip).Take(take));
+    }
+
 }
+internal class InMemCronographLogger(ICronographStore store, IDateTime dateTime, JobRun jobRun) : ILogger
+{
+    class Scope : IDisposable
+    {
+        public void Dispose()
+        {
+        }
+    }
+    public IDisposable? BeginScope<TState>(TState state) where TState : notnull => new Scope();
+    public bool IsEnabled(LogLevel logLevel) => true;
+    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+    {
+        store.AddLog(new LogLine(GlobalId.Next(), jobRun.Id, formatter(state, exception), dateTime.UtcNow));
+    }
+}
+
 internal class InMemCronographLock : ICronographLock
 {
     private static Dictionary<string, bool> locks = new();

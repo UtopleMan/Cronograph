@@ -30,6 +30,7 @@ public static class Extensions
 
 
         endpointBuilder.MapGet(subPath + "/jobs", async (ICronographStore store, CancellationToken cancellationToken) => await store.GetJobs(cancellationToken));
+        endpointBuilder.MapGet(subPath + "/logs/{jobName}", async (string jobName, ICronographStore store, CancellationToken cancellationToken) => await store.GetLog(jobName, cancellationToken: cancellationToken));
         endpointBuilder.MapPost(subPath + "/jobs/execute", async (HttpRequest request, IDateTime dateTime, ICronographStore store, CancellationToken cancellationToken) =>
         {
             var jobName = await request.ReadFromJsonAsync<JobName>();
@@ -62,7 +63,7 @@ public static class Extensions
             if (cnt.Request.Path.ToString().EndsWith(subPath) || cnt.Request.Path.ToString().EndsWith(subPath + "/") || 
                 cnt.Request.Path.ToString().EndsWith(subPath + "/index.html"))
             {
-                var index = manifestEmbeddedProvider.GetDirectoryContents(physicalDir).SingleOrDefault(x => x.Name.Contains("index.html"));
+                var index = manifestEmbeddedProvider.GetDirectoryContents(physicalDir).First(x => x.Name.EndsWith("index.html"));
                 if (index == null)
                 {
                     var directory = manifestEmbeddedProvider.GetDirectoryContents(physicalDir);

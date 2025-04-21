@@ -1,4 +1,5 @@
 ﻿using Cronograph.Shared;
+using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
@@ -24,6 +25,12 @@ public class MongoDbStore : ICronographStore
 
         this.jobTimeoutMinutes = jobTimeoutMinutes;
     }
+
+    public Task AddLog(LogLine logLine)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task<Job?> GetJob(string jobName, CancellationToken cancellationToken)
     {
         var db = mongoClient.GetDatabase(DatabaseName);
@@ -48,6 +55,16 @@ public class MongoDbStore : ICronographStore
     public ICronographLock GetLock()
     {
         return new MongoDbLock(mongoClient, DatabaseName, jobTimeoutMinutes, dateTime);
+    }
+
+    public Task<IEnumerable<LogLine>> GetLog(string jobRunId, int skip = 0, int take = 100, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public ILogger GetLogger(JobRun jobRun)
+    {
+        throw new NotImplementedException();
     }
 
     public async Task UpsertJob(Job job, CancellationToken cancellationToken)

@@ -1,4 +1,6 @@
-﻿namespace Cronograph.Shared;
+﻿using Microsoft.Extensions.Logging;
+
+namespace Cronograph.Shared;
 public enum TimingTypes
 {
     Cron,
@@ -46,6 +48,7 @@ public record JobRun(string Id, string JobName, JobRunStates State, DateTimeOffs
     public JobRun(string Id, string JobName, JobRunStates State, DateTimeOffset Start, DateTimeOffset End) : this(Id, JobName, State, Start, End, "", "")
     { }
 }
+public record LogLine(string Id, string JobRunId, string content, DateTimeOffset Timestamp);
 public enum JobRunStates
 {
     None,
@@ -66,13 +69,13 @@ public class JobName
 }
 public interface ICronograph
 {
-    Task AddJob(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false, CancellationToken cancellationToken = default);
-    Task AddJob(string name, Func<CancellationToken, Task> call, TimeSpan timeSpan, TimeZoneInfo? timeZone = default, bool isSingleton = false, CancellationToken cancellationToken = default);
-    Task AddOneShot(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false, CancellationToken cancellationToken = default);
+    Task AddJob(string name, Func<ILogger, CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false, CancellationToken cancellationToken = default);
+    Task AddJob(string name, Func<ILogger, CancellationToken, Task> call, TimeSpan timeSpan, TimeZoneInfo? timeZone = default, bool isSingleton = false, CancellationToken cancellationToken = default);
+    Task AddOneShot(string name, Func<ILogger, CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false, CancellationToken cancellationToken = default);
     Task AddScheduledService<T>(string name, string cron, TimeZoneInfo? timeZone = default, bool isSingleton = false, CancellationToken cancellationToken = default) where T : IScheduledService;
     Task AddScheduledService<T>(string name, TimeSpan timeSpan, TimeZoneInfo? timeZone = default, bool isSingleton = false, CancellationToken cancellationToken = default) where T : IScheduledService;
 }
 public interface IScheduledService
 {
-    Task ExecuteAsync(CancellationToken stoppingToken);
+    Task ExecuteAsync(ILogger logger, CancellationToken stoppingToken);
 }

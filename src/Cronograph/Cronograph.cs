@@ -14,7 +14,7 @@ public class Cronograph : BackgroundService, ICronograph
     private readonly CronographMemoryCache cache;
     private readonly IOptions<CronographSettings> settings;
     private readonly ServiceProvider provider;
-    Dictionary<string, JobTask> runningTasks = [];
+    List<JobTask> runningTasks = [];
 
     public Cronograph(IDateTime dateTime, ICronographStore store, IServiceCollection services, ILogger<Cronograph> logger, 
         CronographMemoryCache cache, IOptions<CronographSettings> settings)
@@ -26,7 +26,7 @@ public class Cronograph : BackgroundService, ICronograph
         provider = services.BuildServiceProvider();
         this.settings = settings;
     }
-    public async Task AddJob(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default, 
+    public async Task AddJob(string name, Func<ILogger, CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default, 
         bool isSingleton = false, CancellationToken cancellationToken = default)
     {
         var cronExpression = cron.ToCron();
@@ -36,7 +36,7 @@ public class Cronograph : BackgroundService, ICronograph
         var job = CreateJob(name, "job()", cron, timeZone, isSingleton);
         await store.UpsertJob(job with { NextJobRunTime = GetNextOccurrence(job) }, cancellationToken);
     }
-    public async Task AddJob(string name, Func<CancellationToken, Task> call, TimeSpan timeSpan, TimeZoneInfo? timeZone = null, 
+    public async Task AddJob(string name, Func<ILogger, CancellationToken, Task> call, TimeSpan timeSpan, TimeZoneInfo? timeZone = null, 
         bool isSingleton = false, CancellationToken cancellationToken = default)
     {
         var jobFunction = CreateJobFunction(name, call, timeSpan);
@@ -45,7 +45,7 @@ public class Cronograph : BackgroundService, ICronograph
         var job = CreateJob(name, "job()", timeSpan, timeZone, isSingleton);
         await store.UpsertJob(job with { NextJobRunTime = GetNextOccurrence(job) }, cancellationToken);
     }
-    public async Task AddOneShot(string name, Func<CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default, 
+    public async Task AddOneShot(string name, Func<ILogger, CancellationToken, Task> call, string cron, TimeZoneInfo? timeZone = default, 
         bool isSingleton = false, CancellationToken cancellationToken = default)
     {
         var cronExpression = cron.ToCron();
@@ -59,7 +59,7 @@ public class Cronograph : BackgroundService, ICronograph
     {
         var service = provider.GetRequiredService<T>();
         var cronExpression = cron.ToCron();
-        var jobFunction = CreateJobFunction(name, service.ExecuteAsync, cronExpression);
+        var jobFunction = CreateJobFunction(name, (logger, cancellationToken) => service.ExecuteAsync(logger, cancellationToken), cronExpression);
         cache.UpsertJobFunction(jobFunction);
         var job = CreateJob(name, service.GetType().FullName, cron, timeZone, isSingleton);
         await store.UpsertJob(job with { NextJobRunTime = GetNextOccurrence(job) }, cancellationToken);
@@ -68,7 +68,7 @@ public class Cronograph : BackgroundService, ICronograph
         CancellationToken cancellationToken = default) where T : IScheduledService
     {
         var service = provider.GetRequiredService<T>();
-        var jobFunction = CreateJobFunction(name, service.ExecuteAsync, timeSpan);
+        var jobFunction = CreateJobFunction(name, (logger, cancellationToken) => service.ExecuteAsync(logger, cancellationToken), timeSpan);
         cache.UpsertJobFunction(jobFunction);
         var job = CreateJob(name, service.GetType().FullName, timeSpan, timeZone, isSingleton);
         await store.UpsertJob(job with { NextJobRunTime = GetNextOccurrence(job) }, cancellationToken);
@@ -99,9 +99,9 @@ public class Cronograph : BackgroundService, ICronograph
 
         return new Job(name, className, TimingTypes.TimeSpan, String.Empty, timeSpan, usedTimeZone.Id, isSingleton);
     }
-    JobFunction CreateJobFunction(string jobName, Func<CancellationToken, Task> call, CronExpression cronExpression) => 
+    JobFunction CreateJobFunction(string jobName, Func<ILogger, CancellationToken, Task> call, CronExpression cronExpression) => 
         new JobFunction(jobName, call, TimingTypes.Cron, cronExpression, TimeSpan.Zero);
-    JobFunction CreateJobFunction(string jobName, Func<CancellationToken, Task> call, TimeSpan timeSpan) =>
+    JobFunction CreateJobFunction(string jobName, Func<ILogger, CancellationToken, Task> call, TimeSpan timeSpan) =>
         new JobFunction(jobName, call, TimingTypes.Cron, null, timeSpan);
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -150,18 +150,18 @@ public class Cronograph : BackgroundService, ICronograph
     private async Task StopRunningTasks(CancellationTokenSource cancellationTokenSource)
     {
         cancellationTokenSource.Cancel();
-        foreach (var stoppedTask in runningTasks.Where(x => x.Value.Task.IsCompleted || x.Value.Task.IsCanceled || x.Value.Task.IsFaulted || x.Value.Task.IsCompletedSuccessfully))
-            runningTasks.Remove(stoppedTask.Key);
+        CleanUpFinishedTasks();
+
         if (runningTasks.Any())
             logger.LogInformation("Waiting for jobs to finish before shutting down..");
-        Task.WaitAll(runningTasks.Values.Select(x => x.Task).ToArray(), settings.Value.ShutdownTimeoutMs);
+        Task.WaitAll(runningTasks.Select(x => x.Task).ToArray(), settings.Value.ShutdownTimeoutMs);
 
-        foreach (var stillRunningTask in runningTasks.Where(x => !x.Value.Task.IsCompleted || !x.Value.Task.IsCanceled || !x.Value.Task.IsFaulted || !x.Value.Task.IsCompletedSuccessfully))
+        foreach (var stillRunningTask in runningTasks.Where(x => !x.Task.IsCompleted || !x.Task.IsCanceled || !x.Task.IsFaulted || !x.Task.IsCompletedSuccessfully))
         {
-            if (stillRunningTask.Value.Job.IsSingleton)
+            if (stillRunningTask.Job.IsSingleton)
             {
                 var jobLock = store.GetLock();
-                await jobLock.Unlock(stillRunningTask.Value.Job);
+                await jobLock.Unlock(stillRunningTask.Job);
             }
         }
     }
@@ -227,9 +227,15 @@ public class Cronograph : BackgroundService, ICronograph
     }
     private void AddRunningTask(Job job, Task task)
     {
-        runningTasks.Add(job.Name, new JobTask(job, task));
-        foreach (var stoppedTask in runningTasks.Where(x => x.Value.Task.IsCompleted || x.Value.Task.IsCanceled || x.Value.Task.IsFaulted || x.Value.Task.IsCompletedSuccessfully).ToList())
-            runningTasks.Remove(stoppedTask.Key);
+        runningTasks.Add(new JobTask(job, task));
+        CleanUpFinishedTasks();
+    }
+
+    private void CleanUpFinishedTasks()
+    {
+        foreach (var stoppedTask in runningTasks.Where(x => x.Task.IsCompleted || x.Task.IsCanceled || x.Task.IsFaulted || x.Task.IsCompletedSuccessfully).ToList())
+            runningTasks.Remove(stoppedTask);
+
     }
 
     async Task RunAction(Job job, CancellationToken stoppingToken)
@@ -241,7 +247,9 @@ public class Cronograph : BackgroundService, ICronograph
         var jobFunction = cache.GetJobFunction(job.Name);
         try
         {
-            await jobFunction.Action(stoppingToken);
+            var logger = store.GetLogger(run);
+
+            await jobFunction.Action(logger, stoppingToken);
             var end = dateTime.UtcNow;
             if (job.OneShot == true)
                 job = job with { State = JobStates.Stopped };
